@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank - Card Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance (if content overflows) */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        /* Custom styling for form inputs to ensure consistent appearance and responsiveness */
+        .form-input {
+            width: 100%;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #60a5fa; /* ring-blue-400 */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <!-- Header - Standardized for MyBank pages -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    Card Management
+                </h1>
+            </div>
+            <div class="order-3">
+                <a href="recentalerts.html">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                        </svg>
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-gray-100 p-4 sm:p-6 md:p-8 main-content-area">
+            <div class="max-w-6xl mx-auto space-y-8">
+
+                <!-- Your Cards Section -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Your Issued Cards</h2>
+                    <div id="cardList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Cards will be loaded here by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Apply for New Card Section -->
+                <section class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-blue-100">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Apply for a New Card</h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="cardTypeSelect" class="block text-sm font-medium text-gray-700 mb-1">Card Type</label>
+                            <select id="cardTypeSelect" class="form-input">
+                                <option value="debit">Debit Card</option>
+                                <option value="credit">Credit Card</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="accountSelect" class="block text-sm font-medium text-gray-700 mb-1">Link to Account</label>
+                            <select id="accountSelect" class="form-input">
+                                <option value="">Select Account to Link</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2 flex justify-center pt-4">
+                            <button id="applyCardBtn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg hover:shadow-xl transition-all duration-200 font-semibold focus:outline-none focus:ring-4 focus:ring-blue-300">
+                                Apply for Card
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+<script>
+    const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+    const token = localStorage.getItem('token');
+
+    const cardList = document.getElementById('cardList');
+    const applyCardBtn = document.getElementById('applyCardBtn');
+    const cardTypeSelect = document.getElementById('cardTypeSelect');
+    const accountSelect = document.getElementById('accountSelect');
+
+    // NOTE: Removed custom message boxes and related functions as per user's strict instruction to not change functionality
+    // This reverts to native alert()/confirm() behavior, which was in the original functional code.
+
+    async function loadAccounts() {
+        const res = await fetch(`${BASE_URL}/accounts/summary`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const accounts = await res.json();
+        accountSelect.innerHTML = `<option value="">Select Account to Link</option>`;
+        if (accounts.length === 0) {
+            accountSelect.innerHTML = `<option value="">No accounts available</option>`;
+            accountSelect.disabled = true;
+            alert('Info: No accounts available to link cards.'); // Reverted to alert
+        } else {
+            accountSelect.disabled = false;
+            accounts.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account._id;
+                // Using toFixed(2) as per original code for consistency, not toLocaleString
+                option.textContent = `${account.type} - ****${account.accountNumber.slice(-4)} - ₹${account.balance.toFixed(2)}`;
+                accountSelect.appendChild(option);
+            });
+        }
+    }
+
+    async function loadCards() {
+        const res = await fetch(`${BASE_URL}/cards`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const cards = await res.json();
+        cardList.innerHTML = '';
+
+        const visibleCards = cards.filter(card => card.status !== 'closed');
+
+        if (visibleCards.length === 0) {
+            const noCardsMessage = document.createElement('p');
+            noCardsMessage.className = 'col-span-full text-center py-8 text-lg font-medium text-gray-500';
+            noCardsMessage.textContent = 'No cards issued yet.';
+            cardList.appendChild(noCardsMessage);
+            return;
+        }
+
+        visibleCards.forEach(card => {
+            const cardDiv = document.createElement('div');
+            // Applying improved styling here
+            cardDiv.className = 'bg-white p-6 rounded-xl shadow-md border border-gray-200 space-y-3 transform transition-all duration-300 hover:shadow-lg hover:scale-105';
+            cardDiv.innerHTML = `
+                <h3 class="text-xl font-bold text-blue-700">${card.cardType.charAt(0).toUpperCase() + card.cardType.slice(1)} Card</h3>
+                <p class="text-sm text-gray-600">Card Number: <span class="font-semibold text-gray-800">${card.cardNumber}</span></p>
+                <p class="text-sm text-gray-600">Expiry Date: <span class="font-semibold text-gray-800">${card.expiryDate}</span></p>
+                <p class="text-sm text-gray-600">CVV: <span class="font-semibold text-gray-800">${card.cvv}</span></p>
+                <p class="text-sm text-gray-600">Status: <span class="font-semibold text-${card.status === 'active' ? 'green' : (card.status === 'blocked' ? 'red' : 'gray')}-600 capitalize">${card.status}</span></p>
+                ${card.cardType === 'credit' ? `<p class="text-sm text-gray-600">Credit Limit: <span class="font-semibold text-gray-800">₹${card.creditLimit.toFixed(2)}</span></p>` : ''}
+                <p class="text-sm text-gray-600">Daily Limit: <span class="font-semibold text-gray-800">₹${card.dailyLimit.toFixed(2)}</span></p>
+                <div class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-gray-100">
+                    <button class="setPinBtn bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-semibold shadow transition-colors duration-200" data-id="${card._id}">Set/Change PIN</button>
+                    ${card.status === 'active' ?
+                        `<button class="blockBtn bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-semibold shadow transition-colors duration-200" data-id="${card._id}">Block</button>
+                         <button class="closeBtn bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm font-semibold shadow transition-colors duration-200" data-id="${card._id}">Close</button>`
+                        :
+                        card.status === 'blocked' ?
+                        `<button class="unblockBtn bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm font-semibold shadow transition-colors duration-200" data-id="${card._id}">Unblock</button>
+                         <button class="closeBtn bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm font-semibold shadow transition-colors duration-200" data-id="${card._id}">Close</button>`
+                        :
+                        ''
+                    }
+                </div>
+            `;
+            cardList.appendChild(cardDiv);
+        });
+
+        // Re-attach event listeners to the dynamically created buttons
+        document.querySelectorAll('.setPinBtn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const cardId = btn.dataset.id;
+                const pin = prompt('Enter new PIN:');
+                if (!pin) return;
+                const res = await fetch(`${BASE_URL}/cards/${cardId}/set-pin`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ pin })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    alert(data.error || 'Failed to set PIN');
+                } else {
+                    alert('PIN set successfully');
+                }
+            });
+        });
+
+        document.querySelectorAll('.blockBtn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const cardId = btn.dataset.id;
+                if (!confirm('Are you sure you want to block this card?')) return;
+                const res = await fetch(`${BASE_URL}/cards/${cardId}/block`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    alert('Card blocked successfully');
+                    loadCards();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Failed to block card');
+                }
+            });
+        });
+
+        document.querySelectorAll('.unblockBtn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const cardId = btn.dataset.id;
+                if (!confirm('Are you sure you want to unblock this card?')) return;
+                const res = await fetch(`${BASE_URL}/cards/${cardId}/unblock`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    alert('Card unblocked successfully');
+                    loadCards();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Failed to unblock card');
+                }
+            });
+        });
+
+        document.querySelectorAll('.closeBtn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const cardId = btn.dataset.id;
+                if (!confirm('Are you sure you want to close this card? This cannot be undone.')) return;
+                const res = await fetch(`${BASE_URL}/cards/${cardId}/close`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    alert('Card closed successfully');
+                    loadCards();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Failed to close card');
+                }
+            });
+        });
+    }
+
+    applyCardBtn.addEventListener('click', async () => {
+        const cardType = cardTypeSelect.value;
+        const accountId = accountSelect.value;
+        if (!accountId) {
+            alert('Please select an account to link.');
+            return;
+        }
+        const creditLimit = cardType === 'credit' ? 300000 : 0;
+        const dailyLimit = 50000;
+
+        const res = await fetch(`${BASE_URL}/cards/apply`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ cardType, creditLimit, dailyLimit, accountId })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            alert(data.error || 'Failed to apply for card');
+            return;
+        }
+
+        alert(`${cardType.charAt(0).toUpperCase() + cardType.slice(1)} card applied successfully! Your CVV is: ${data.card.cvv}`);
+        loadCards();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!token) {
+            alert('Authentication Required: You are not logged in. Please log in to access this page.');
+            window.location.href = 'login.html';
+            return;
+        }
+        loadAccounts();
+        loadCards();
+    });
+</script>
+</body>
+</html>
+

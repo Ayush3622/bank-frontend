@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank - Spending Summary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance (if content overflows) */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        /* Custom styling for form inputs to ensure consistent appearance and responsiveness */
+        .form-input {
+            width: 100%;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #60a5fa; /* ring-blue-400 */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <!-- Header - Standardized for MyBank pages -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    Spending Summary
+                </h1>
+            </div>
+            <div class="order-3">
+                <a href="recentalerts.html">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                        </svg>
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full space-y-8 main-content-area">
+
+            <!-- Date Range Selection -->
+            <section class="bg-white p-6 rounded-xl shadow-lg border border-blue-100">
+    <h2 class="text-xl font-bold mb-4 text-center text-gray-900">Select Filters</h2>
+    <div class="flex flex-col sm:flex-row gap-4 mb-4 justify-center items-center">
+        <div class="w-full sm:w-auto">
+            <label for="fromDate" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+            <input type="date" id="fromDate" class="form-input" />
+        </div>
+        <div class="w-full sm:w-auto">
+            <label for="toDate" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+            <input type="date" id="toDate" class="form-input" />
+        </div>
+        <div class="w-full sm:w-auto">
+            <label for="excludeCategory" class="block text-sm font-medium text-gray-700 mb-1">Exclude Category</label>
+            <select id="excludeCategory" class="form-input">
+                <option value="">None</option>
+                <option value="Bills">Bills</option>
+                <option value="Loans">Loans</option>
+                <option value="Deposits">Deposits</option>
+                <option value="Investments">Investments</option>
+                <option value="Insurance">Insurance</option>
+                <option value="Transfers_Others">Transfers_Others</option>
+            </select>
+        </div>
+        <button id="fetchSummary" class="w-full sm:w-auto mt-4 sm:mt-0 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">
+            Fetch Summary
+        </button>
+    </div>
+</section>
+
+
+            <!-- Summary Metrics -->
+            <section class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6 text-center">
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h2 class="text-gray-600 text-sm mb-2 font-medium">Total Spent</h2>
+                    <p id="totalSpent" class="text-3xl font-extrabold text-red-600">₹0</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h2 class="text-gray-600 text-sm mb-2 font-medium">Highest Transaction</h2>
+                    <p id="highestTransaction" class="text-3xl font-extrabold text-blue-600">₹0</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h2 class="text-gray-600 text-sm mb-2 font-medium">Top Category</h2>
+                    <p id="topCategory" class="text-3xl font-extrabold text-green-600">N/A</p>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 flex items-center justify-center">
+                    <canvas id="categoryChart" class="w-full h-full"></canvas>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 flex items-center justify-center">
+                    <canvas id="timeChart" class="w-full h-full"></canvas>
+                </div>
+            </section>
+
+            <!-- Category Spendings List -->
+            <section id="categoryDetails" class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                <h2 class="text-xl font-bold mb-4 text-gray-900">Category Spendings</h2>
+                <ul id="categoryList" class="space-y-3 text-gray-700"></ul>
+            </section>
+        </main>
+    </div>
+
+   <script>
+const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+const token = localStorage.getItem('token');
+
+const totalSpentEl = document.getElementById('totalSpent');
+const highestTransactionEl = document.getElementById('highestTransaction');
+const topCategoryEl = document.getElementById('topCategory');
+const fetchBtn = document.getElementById('fetchSummary');
+const categoryListEl = document.getElementById('categoryList');
+const excludeCategoryEl = document.getElementById('excludeCategory');
+
+let categoryChart, timeChart;
+
+fetchBtn.addEventListener('click', async () => {
+    const from = document.getElementById('fromDate').value;
+    const to = document.getElementById('toDate').value;
+    const excludeCategory = excludeCategoryEl.value;
+
+    try {
+        const res = await fetch(`${BASE_URL}/spending-summary?from=${from}&to=${to}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        console.log('Full Category Summary:', data.categorySummary);
+
+        totalSpentEl.textContent = `₹${data.totalSpent.toFixed(2)}`;
+        highestTransactionEl.textContent = `₹${data.highestTransaction.amount.toFixed(2)}`;
+
+        // Apply exclusion globally
+        const filteredCategories = {};
+        for (const [category, amount] of Object.entries(data.categorySummary)) {
+            if (category !== excludeCategory) {
+                filteredCategories[category] = amount;
+            }
+        }
+
+        // Update top category based on filtered data
+        const topCategory = Object.entries(filteredCategories).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+        topCategoryEl.textContent = topCategory;
+
+        // ✅ Update Category Spendings List
+        categoryListEl.innerHTML = '';
+        for (const [category, amount] of Object.entries(filteredCategories)) {
+            const li = document.createElement('li');
+            li.textContent = `${category}: ₹${amount.toFixed(2)}`;
+            li.className = 'flex justify-between items-center bg-gray-50 p-3 rounded-md border border-gray-100';
+            categoryListEl.appendChild(li);
+        }
+
+        // Destroy previous charts
+        if (categoryChart) categoryChart.destroy();
+        if (timeChart) timeChart.destroy();
+
+        // ✅ Pie Chart with Exclusion
+        const ctx1 = document.getElementById('categoryChart').getContext('2d');
+        categoryChart = new Chart(ctx1, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(filteredCategories),
+                datasets: [{
+                    data: Object.values(filteredCategories),
+                    backgroundColor: ['#f87171', '#60a5fa', '#34d399', '#facc15', '#a78bfa', '#fb923c'],
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // ✅ Time Series Bar Chart with Exclusion
+        const dates = Object.keys(data.timeSeries).sort();
+        const amounts = dates.map(date => {
+            let sum = data.transactions
+                .filter(tx => tx.createdAt.startsWith(date))
+                .filter(tx => {
+                    if (!excludeCategory) return true; // no exclusion
+                    const desc = tx.description ? tx.description.toLowerCase() : '';
+                    if (excludeCategory === "Bills" && desc.includes("bill payment")) return false;
+                    if (excludeCategory === "Loans" && desc.includes("emi payment")) return false;
+                    if (excludeCategory === "Deposits" && (desc.includes("fd deposit") || desc.includes("rd deposit"))) return false;
+                    if (excludeCategory === "Investments" && desc.includes("bought")) return false;
+                    if (excludeCategory === "Insurance" && (desc.includes("insurance purchase") || desc.includes("premium paid"))) return false;
+                    if (excludeCategory === "Transfers_Others" && 
+                        !(desc.includes("bill payment") || desc.includes("emi payment") ||
+                        desc.includes("fd deposit") || desc.includes("rd deposit") ||
+                        desc.includes("bought") || desc.includes("insurance purchase") || desc.includes("premium paid"))) return false;
+                    return true;
+                })
+                .reduce((acc, tx) => acc + tx.amount, 0);
+            return sum;
+        });
+
+        const ctx2 = document.getElementById('timeChart').getContext('2d');
+        timeChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: excludeCategory ? `Spent excluding ${excludeCategory} (₹)` : 'Spent (₹)',
+                    data: amounts,
+                    backgroundColor: '#60a5fa'
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                plugins: { legend: { display: true, position: 'bottom' } }
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        alert('Failed to fetch spending summary.');
+    }
+});
+</script>
+
+</body>
+</html>
+
+
+

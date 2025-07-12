@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank - KYC Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance (if content overflows) */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        /* Custom styling for form inputs to ensure consistent appearance and responsiveness */
+        .form-input {
+            width: 100%;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #60a5fa; /* ring-blue-400 */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <!-- Header - Standardized for MyBank pages -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    KYC Status
+                </h1>
+            </div>
+            <div class="order-3">
+                <a href="recentalerts.html">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                        </svg>
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-8 main-content-area">
+            <div class="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow-lg border border-blue-100">
+                <h1 class="text-3xl font-extrabold mb-6 text-center text-gray-900">KYC Verification</h1>
+
+                <div id="kycStatus" class="mb-6 text-center"></div>
+
+                <form id="kycForm" class="space-y-4">
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="fullName" placeholder="Full Name" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <input type="text" id="address" placeholder="Address" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                        <input type="date" id="dob" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                        <input type="text" id="gender" placeholder="Gender" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="nationality" class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                        <input type="text" id="nationality" placeholder="Nationality" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="aadhaarNumber" class="block text-sm font-medium text-gray-700 mb-1">Aadhaar Number</label>
+                        <input type="text" id="aadhaarNumber" placeholder="Aadhaar Number" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="panNumber" class="block text-sm font-medium text-gray-700 mb-1">PAN Number</label>
+                        <input type="text" id="panNumber" placeholder="PAN Number" class="form-input" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Upload Address Proof (PDF):</label>
+                        <input type="file" id="addressProof" accept="application/pdf" class="form-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Upload ID Proof (PDF):</label>
+                        <input type="file" id="idProof" accept="application/pdf" class="form-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
+                    </div>
+
+                    <button type="submit" class="bg-blue-600 text-white w-full p-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">Submit KYC</button>
+                </form>
+
+                <div id="kycDetails" class="mt-8 hidden p-6 border border-green-200 bg-green-50 rounded-lg">
+                    <div class="flex items-center justify-center mb-6 space-x-2">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span class="text-green-800 font-semibold text-lg">KYC Verified</span>
+                    </div>
+                    <div id="detailsContainer" class="space-y-3 text-base text-gray-700"></div>
+                    <button id="updateBtn" class="mt-6 bg-yellow-500 text-white w-full p-3 rounded-lg hover:bg-yellow-600 font-semibold shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-yellow-300">Update KYC</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+        const token = localStorage.getItem('token');
+
+        const kycForm = document.getElementById('kycForm');
+        const kycDetails = document.getElementById('kycDetails');
+        const detailsContainer = document.getElementById('detailsContainer');
+        const updateBtn = document.getElementById('updateBtn');
+
+        async function loadKYC() {
+            try {
+                const res = await fetch(`${BASE_URL}/kyc/status`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('KYC not found');
+                const data = await res.json();
+                showKYCDetails(data.kyc);
+            } catch {
+                kycForm.classList.remove('hidden');
+            }
+        }
+
+        function showKYCDetails(kyc) {
+            kycForm.classList.add('hidden');
+            kycDetails.classList.remove('hidden');
+
+            const maskedAadhaar = 'XXXX XXXX ' + kyc.aadhaarNumber.slice(-4);
+            const maskedPAN = 'XXXXX' + kyc.panNumber.slice(-5);
+
+            detailsContainer.innerHTML = `
+                <div class="flex justify-between"><strong>Full Name:</strong> <span>${kyc.fullName}</span></div>
+                <div class="flex justify-between"><strong>Address:</strong> <span>${kyc.address}</span></div>
+                <div class="flex justify-between"><strong>DOB:</strong> <span>${new Date(kyc.dob).toLocaleDateString()}</span></div>
+                <div class="flex justify-between"><strong>Gender:</strong> <span>${kyc.gender}</span></div>
+                <div class="flex justify-between"><strong>Nationality:</strong> <span>${kyc.nationality}</span></div>
+                <div class="flex justify-between"><strong>Aadhaar Number:</strong> <span>${maskedAadhaar}</span></div>
+                <div class="flex justify-between"><strong>PAN Number:</strong> <span>${maskedPAN}</span></div>
+            `;
+        }
+
+        kycForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const addressProofFile = document.getElementById('addressProof').files[0];
+            const idProofFile = document.getElementById('idProof').files[0];
+
+            if (!addressProofFile || !idProofFile) {
+                alert('Please upload both address proof and ID proof PDFs.');
+                return;
+            }
+
+            if (addressProofFile.type !== 'application/pdf' || idProofFile.type !== 'application/pdf') {
+                alert('Only PDF files are allowed for proofs.');
+                return;
+            }
+
+            const data = {
+                fullName: document.getElementById('fullName').value,
+                address: document.getElementById('address').value,
+                dob: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                nationality: document.getElementById('nationality').value,
+                aadhaarNumber: document.getElementById('aadhaarNumber').value,
+                panNumber: document.getElementById('panNumber').value
+            };
+
+            try {
+                const res = await fetch(`${BASE_URL}/kyc/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    alert('KYC submitted successfully');
+                    location.reload();
+                } else {
+                    alert(result.message || 'Error submitting KYC');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error submitting KYC');
+            }
+        });
+
+        updateBtn.addEventListener('click', async () => {
+            kycDetails.classList.add('hidden');
+            kycForm.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`${BASE_URL}/kyc/status`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                const kyc = data.kyc;
+
+                document.getElementById('fullName').value = kyc.fullName;
+                document.getElementById('address').value = kyc.address;
+                document.getElementById('dob').value = kyc.dob.split('T')[0];
+                document.getElementById('gender').value = kyc.gender;
+                document.getElementById('nationality').value = kyc.nationality;
+                document.getElementById('aadhaarNumber').value = kyc.aadhaarNumber;
+                document.getElementById('panNumber').value = kyc.panNumber;
+            } catch (err) {
+                console.error(err);
+                alert('Error loading KYC for update');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial authentication check
+            if (!token) {
+                alert('Authentication Required: You are not logged in. Please log in to access this page.');
+                window.location.href = 'login.html';
+                return;
+            }
+            loadKYC();
+        });
+    </script>
+</body>
+</html>
+
+
+
+

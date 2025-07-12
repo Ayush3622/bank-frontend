@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MyBank - Quick Contacts with Payment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance (if content overflows) */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        /* Custom styling for form inputs to ensure consistent appearance and responsiveness */
+        .form-input {
+            width: 100%;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #60a5fa; /* ring-blue-400 */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <!-- Header - Standardized for MyBank pages -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    Quick Contacts
+                </h1>
+            </div>
+            <div class="order-3">
+                <a href="recentalerts.html">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                        </svg>
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-8 main-content-area">
+            <div class="max-w-xl mx-auto w-full space-y-8">
+
+                <!-- Add Quick Contact Form -->
+                <section class="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-blue-100">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-900">Add New Contact</h2>
+                    <form id="quickContactForm" class="space-y-4">
+                        <div>
+                            <label for="contactName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                            <input type="text" id="contactName" class="form-input" placeholder="e.g., John Doe" required />
+                        </div>
+                        <div>
+                            <label for="contactAccountNumber" class="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+                            <input type="text" id="contactAccountNumber" class="form-input" placeholder="e.g., 1234567890" required />
+                        </div>
+                        <div>
+                            <label for="contactIFSC" class="block text-sm font-medium text-gray-700 mb-1">IFSC Code (required for external)</label>
+                            <input type="text" id="contactIFSC" class="form-input" placeholder="e.g., HDFC0001234" />
+                        </div>
+                        <div>
+                            <label for="transferType" class="block text-sm font-medium text-gray-700 mb-1">Transfer Type</label>
+                            <select id="transferType" class="form-input" required>
+                                <option value="">Select Type</option>
+                                <option value="sameBank">Same Bank</option>
+                                <option value="external">External Bank</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">Save Contact</button>
+                    </form>
+                </section>
+
+                <!-- Saved Contacts List -->
+                <section id="contactsList" class="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-blue-100">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900">Saved Quick Contacts</h2>
+                    <!-- Contacts will be loaded here by JavaScript -->
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Payment Modal with Account Selection -->
+    <div id="payModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm">
+            <h2 id="payModalTitle" class="text-2xl font-bold mb-6 text-center text-gray-900">Pay Contact</h2>
+            <form id="payForm" class="space-y-4">
+                <input type="hidden" id="payContactId" />
+                <div>
+                    <label for="fromAccountSelect" class="block text-sm font-medium text-gray-700 mb-1">From Account</label>
+                    <select id="fromAccountSelect" class="form-input" required>
+                        <option value="">Loading accounts...</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="payAmount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                    <input type="number" id="payAmount" min="1" step="0.01" class="form-input" placeholder="e.g., 500.00" required />
+                </div>
+                <div>
+                    <label for="payNote" class="block text-sm font-medium text-gray-700 mb-1">Note (optional)</label>
+                    <input type="text" id="payNote" class="form-input" placeholder="e.g., Monthly payment" />
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closePayModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300">Cancel</button>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-300">Pay</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+const token = localStorage.getItem('token');
+
+let currentPayContact = null;
+const contactsList = document.getElementById('contactsList'); // Get this reference once
+
+// Load saved quick contacts
+async function loadContacts() {
+    try {
+        const res = await fetch(`${BASE_URL}/quick-contacts`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const contacts = data.contacts || [];
+
+        // Clear existing content, but keep the heading
+        contactsList.innerHTML = '<h2 class="text-2xl font-bold mb-6 text-gray-900">Saved Quick Contacts</h2>';
+
+        if (contacts.length === 0) {
+            contactsList.innerHTML += '<p class="text-gray-500 text-center py-4">No contacts added yet. Use the form above to add one!</p>';
+        } else {
+            const list = document.createElement('ul');
+            list.className = 'space-y-4'; // Added more spacing between items
+            contacts.forEach(contact => {
+                const item = document.createElement('li');
+                item.className = 'bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0'; // Styled list item
+                item.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-lg text-gray-800">${contact.name}</p>
+                        <p class="text-sm text-gray-600">A/C: ${contact.accountNumber} (${contact.type === 'sameBank' ? 'Same Bank' : 'External Bank'})</p>
+                        ${contact.ifsc ? `<p class="text-xs text-gray-500">IFSC: ${contact.ifsc}</p>` : ''}
+                    </div>
+                    <div class="flex space-x-2 mt-2 sm:mt-0">
+                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-semibold shadow transition-colors duration-200"
+                            onclick='openPayModal(${JSON.stringify(contact)})'>Pay Now</button>
+                        <button class="delete-contact-btn bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-semibold shadow transition-colors duration-200"
+                            data-contact-id="${contact._id}">Delete</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+            contactsList.appendChild(list);
+        }
+    } catch (err) {
+        console.error(err);
+        contactsList.innerHTML = '<p class="text-red-600 text-center py-4">Failed to load contacts. Please check your network connection.</p>';
+    }
+}
+
+// Add quick contact
+document.getElementById('quickContactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+        name: document.getElementById('contactName').value,
+        accountNumber: document.getElementById('contactAccountNumber').value,
+        ifsc: document.getElementById('contactIFSC').value,
+        type: document.getElementById('transferType').value
+    };
+    try {
+        const res = await fetch(`${BASE_URL}/quick-contacts`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        if (res.ok) {
+            alert('Contact saved successfully!');
+            e.target.reset();
+            loadContacts();
+        } else {
+            const result = await res.json();
+            alert(result.message || 'Error saving contact');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Server error');
+    }
+});
+
+// Load user accounts into select
+async function loadUserAccounts() {
+    const select = document.getElementById('fromAccountSelect');
+    select.innerHTML = '<option value="">Loading accounts...</option>';
+    try {
+        const res = await fetch(`${BASE_URL}/accounts/summary`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const accounts = data.accounts || data || []; // Handle cases where 'accounts' might be directly the array
+        select.innerHTML = '<option value="">Select Account</option>';
+        if (accounts.length === 0) {
+            select.innerHTML = '<option value="">No accounts available</option>';
+            select.disabled = true;
+        } else {
+            select.disabled = false;
+            accounts.forEach(acc => {
+                const opt = document.createElement('option');
+                opt.value = acc._id;
+                opt.textContent = `${acc.type} - ****${acc.accountNumber.slice(-4)} (Bal: ₹${parseFloat(acc.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`;
+                select.appendChild(opt);
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        select.innerHTML = '<option value="">Failed to load accounts</option>';
+        alert('Failed to load accounts. Check console.');
+    }
+}
+
+// Open payment modal
+function openPayModal(contact) {
+    currentPayContact = contact;
+    document.getElementById('payContactId').value = contact._id;
+    document.getElementById('payModalTitle').textContent = `Pay ${contact.name}`;
+    document.getElementById('payAmount').value = '';
+    document.getElementById('payNote').value = '';
+    document.getElementById('payModal').classList.remove('hidden');
+    loadUserAccounts(); // Load accounts every time modal opens to get fresh balances
+}
+
+// Close payment modal
+function closePayModal() {
+    document.getElementById('payModal').classList.add('hidden');
+    currentPayContact = null;
+}
+
+// Handle payment submission
+document.getElementById('payForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fromAccountId = document.getElementById('fromAccountSelect').value;
+    const amount = parseFloat(document.getElementById('payAmount').value);
+    const description = document.getElementById('payNote').value;
+
+    if (!fromAccountId) {
+        alert('Please select a source account.');
+        return;
+    }
+    if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid amount greater than zero.');
+        return;
+    }
+    if (!currentPayContact) {
+        alert('Contact information is missing. Please re-open the payment modal.');
+        return;
+    }
+
+    const payload = {
+        fromAccountId,
+        amount,
+        description,
+        transferType: currentPayContact.type,
+        recipientAccountNumber: currentPayContact.accountNumber,
+        recipientName: currentPayContact.name,
+        ifsc: currentPayContact.ifsc || ''
+    };
+
+    try {
+        const transferRes = await fetch(`${BASE_URL}/transfer`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (transferRes.ok) {
+            alert('Payment successful!');
+            closePayModal();
+            loadContacts(); // Refresh contacts list (though not strictly needed for payment, good practice)
+            loadUserAccounts(); // Refresh accounts in case balances changed
+        } else {
+            const errData = await transferRes.json();
+            alert(errData.message || 'Payment failed.');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Server error during payment.');
+    }
+});
+
+// --- New: Delete Contact Functionality ---
+async function deleteContact(contactId) {
+    if (!confirm('Are you sure you want to delete this contact? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`${BASE_URL}/quick-contacts/${contactId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            alert('Contact deleted successfully!');
+            loadContacts(); // Reload the list to show the updated contacts
+        } else {
+            const result = await res.json();
+            alert(result.message || 'Error deleting contact.');
+        }
+    } catch (err) {
+        console.error('Error deleting contact:', err);
+        alert('Server error during contact deletion.');
+    }
+}
+
+// Event delegation for delete buttons
+contactsList.addEventListener('click', (e) => {
+    if (e.target.classList.contains('delete-contact-btn')) {
+        const contactId = e.target.dataset.contactId;
+        deleteContact(contactId);
+    }
+});
+
+
+// Initial load
+document.addEventListener('DOMContentLoaded', () => {
+    if (!token) {
+        alert('Authentication Required: You are not logged in. Please log in to access this page.');
+        window.location.href = 'login.html';
+        return;
+    }
+    loadContacts();
+});
+</script>
+
+</body>
+</html>
+
+
+

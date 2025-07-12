@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank - Insurance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        /* Custom styling for form inputs to ensure consistent appearance and responsiveness */
+        .form-input {
+            width: 100%;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #60a5fa; /* ring-blue-400 */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+        }
+
+        /* Styling for modal content animation */
+        .modal-content-animation {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease-out;
+        }
+        .modal-content-animation.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    Insurance Management
+                </h1>
+            </div>
+            <div class="order-3">
+                <a href="recentalerts.html">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                        </svg>
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        <main class="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full space-y-10 main-content-area">
+            <section>
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Your Active Insurance Policies</h2>
+                <div id="insuranceContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+            </section>
+
+            <hr class="my-8 border-gray-200" />
+
+            <section class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-blue-100">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Buy New Insurance</h2>
+                <form id="buyForm" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="productId" class="block text-sm font-medium text-gray-700 mb-1">Select Policy</label>
+                        <select id="productId" class="form-input" required>
+                            <option value="">Select an insurance product</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="accountId" class="block text-sm font-medium text-gray-700 mb-1">Select Payment Account</label>
+                        <select id="accountId" class="form-input" required>
+                            <option value="">Select an account</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2 flex justify-center sm:justify-end pt-4">
+                        <button type="submit" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg hover:shadow-xl transition-all duration-200 font-semibold focus:outline-none focus:ring-4 focus:ring-green-300">Buy Policy</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm mx-auto modal-content-animation"
+             id="messageBoxContent">
+            <h3 id="messageTitle" class="text-2xl font-bold mb-4 text-gray-900"></h3>
+            <p id="messageText" class="text-gray-700 text-base mb-6 leading-relaxed"></p>
+            <div class="flex justify-end">
+                <button onclick="closeMessage()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmationBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-lg mx-auto modal-content-animation"
+             id="confirmationBoxContent">
+            <h3 id="confirmationTitle" class="text-2xl font-bold mb-4 text-gray-900"></h3>
+            <p id="confirmationText" class="text-gray-700 text-base mb-6 leading-relaxed"></p>
+            <div class="flex justify-end space-x-3">
+                <button id="confirmCancelBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all duration-200">
+                    No
+                </button>
+                <button id="confirmYesBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-200">
+                    Yes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+        const token = localStorage.getItem('token');
+
+        // General Message Box Elements
+        const messageBox = document.getElementById('messageBox');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+        const messageTitle = document.getElementById('messageTitle');
+        const messageText = document.getElementById('messageText');
+
+        // Confirmation Box Elements
+        const confirmationBox = document.getElementById('confirmationBox');
+        const confirmationBoxContent = document.getElementById('confirmationBoxContent');
+        const confirmationTitle = document.getElementById('confirmationTitle');
+        const confirmationText = document.getElementById('confirmationText');
+        const confirmYesBtn = document.getElementById('confirmYesBtn');
+        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+        let onConfirmAction = null; // Stores the callback for confirmation
+
+        // --- General Message Box Functions (for simple alerts/success) ---
+        function showMessage(title, text, callback = null) {
+            messageTitle.textContent = title;
+            messageText.textContent = text;
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBoxContent.classList.add('show');
+            }, 10);
+
+            const okButton = messageBox.querySelector('button');
+            okButton.onclick = () => {
+                closeMessage();
+                if (callback) callback();
+            };
+        }
+
+        function closeMessage() {
+            messageBoxContent.classList.remove('show');
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+                messageBox.querySelector('button').onclick = null; // Clear listener
+            }, 300);
+        }
+
+        // --- Confirmation Box Functions (for Yes/No prompts) ---
+        function showConfirmation(title, text, onConfirmCallback) {
+            confirmationTitle.textContent = title;
+            confirmationText.innerHTML = text; // Use innerHTML to render formatted text
+            onConfirmAction = onConfirmCallback;
+
+            confirmationBox.classList.remove('hidden');
+            setTimeout(() => {
+                confirmationBoxContent.classList.add('show');
+            }, 10);
+
+            confirmYesBtn.onclick = () => {
+                closeConfirmation();
+                if (onConfirmAction) onConfirmAction();
+            };
+            confirmCancelBtn.onclick = () => {
+                closeConfirmation();
+            };
+        }
+
+        function closeConfirmation() {
+            confirmationBoxContent.classList.remove('show');
+            setTimeout(() => {
+                confirmationBox.classList.add('hidden');
+                onConfirmAction = null;
+                confirmYesBtn.onclick = null;
+                confirmCancelBtn.onclick = null;
+            }, 300);
+        }
+
+        async function fetchInsurances() {
+            try {
+                const res = await fetch(`${BASE_URL}/insurance/my-policies`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    showMessage('Error', errorData.message || 'Failed to load policies.');
+                    return;
+                }
+
+                const data = await res.json();
+                const active = data.filter(p => p.status === 'Active');
+                renderInsuranceCards(active);
+            } catch (err) {
+                console.error('Failed to load policies:', err);
+                showMessage('Network Error', 'Could not load policies. Please check your network connection.');
+            }
+        }
+
+        function renderInsuranceCards(policies) {
+            const container = document.getElementById('insuranceContainer');
+            container.innerHTML = ''; // Clear previous content
+
+            if (policies.length === 0) {
+                // Dynamically create and append the "No policies found" message
+                const noPoliciesMessage = document.createElement('p');
+                noPoliciesMessage.className = 'col-span-full text-center py-8 text-lg font-medium text-gray-500';
+                noPoliciesMessage.textContent = 'No active insurance policies found.';
+                container.appendChild(noPoliciesMessage);
+                return;
+            }
+
+            policies.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-xl shadow-md border border-gray-200 space-y-3 transform transition-all duration-300 hover:shadow-lg hover:scale-105';
+                card.innerHTML = `
+                    <h3 class="text-xl font-bold mb-2 text-blue-700">${item.policyName}</h3>
+                    <p><strong>Type:</strong> <span class="font-medium">${item.type}</span></p>
+                    <p><strong>Coverage:</strong> <span class="font-medium">₹${parseFloat(item.coverageAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>
+                    <p><strong>Premium:</strong> <span class="font-medium">₹${parseFloat(item.premium).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>
+                    <p><strong>Term:</strong> <span class="font-medium">${item.termYears} year(s)</span></p>
+                    <p><strong>Paid Premiums:</strong> <span class="font-medium">${item.paidPremiums}</span></p>
+                    <p><strong>Start Date:</strong> <span class="font-medium">${new Date(item.startDate).toLocaleDateString('en-IN')}</span></p>
+
+                    <div class="mt-4 space-y-3">
+                        <button onclick="payPremium('${item._id}')" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md text-sm font-semibold shadow transition-colors duration-200">Pay Premium</button>
+                        <button onclick="promptCancelPolicy('${item._id}')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md text-sm font-semibold shadow transition-colors duration-200">Cancel Policy</button>
+                        
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <select id="claimAccount-${item._id}" class="form-input flex-grow" required>
+                                <option value="">Select Account for Claim</option>
+                            </select>
+                            <button onclick="toggleClaimForm('${item._id}', ${item.coverageAmount}, '${item.type}')" class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-semibold shadow transition-colors duration-200">Initiate Claim</button>
+                        </div>
+
+                        <div id="claimForm-${item._id}" class="hidden p-4 bg-blue-50 rounded-lg border border-blue-200 mt-4 space-y-3">
+                            <h4 class="text-lg font-bold text-blue-800">Submit Claim Request</h4>
+                            <div>
+                                <label for="claimAmount-${item._id}" class="block text-sm font-medium text-gray-700 mb-1">Claim Amount <span id="maxClaim-${item._id}" class="text-gray-500">(Max: ₹${parseFloat(item.coverageAmount).toLocaleString('en-IN')})</span></label>
+                                <input type="number" id="claimAmount-${item._id}" class="form-input" 
+                                       min="0.01" max="${item.coverageAmount}" step="0.01" 
+                                       value="${item.coverageAmount}" required>
+                            </div>
+                            <div>
+                                <label for="claimReason-${item._id}" class="block text-sm font-medium text-gray-700 mb-1">Reason for Claim</label>
+                                <textarea id="claimReason-${item._id}" class="form-input" rows="3" placeholder="Briefly describe the reason for your claim..." required></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-2">
+                                <button onclick="toggleClaimForm('${item._id}')" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-md text-sm font-semibold">Cancel</button>
+                                <button onclick="promptClaimPolicy('${item._id}')" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm font-semibold">Submit Claim Request</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+                loadClaimAccounts(`claimAccount-${item._id}`); // Load accounts for this specific claim dropdown
+            });
+        }
+
+        // New function to toggle the claim form visibility
+        function toggleClaimForm(policyId, coverageAmount, policyType) {
+            const claimFormDiv = document.getElementById(`claimForm-${policyId}`);
+            if (claimFormDiv) {
+                claimFormDiv.classList.toggle('hidden');
+                if (!claimFormDiv.classList.contains('hidden')) {
+                    // If showing the form, pre-fill the amount and focus
+                    const claimAmountInput = document.getElementById(`claimAmount-${policyId}`);
+                    const claimReasonTextarea = document.getElementById(`claimReason-${policyId}`);
+                    const maxClaimSpan = document.getElementById(`maxClaim-${policyId}`);
+
+                    // Logic for different insurance types
+                    if (policyType === 'Life' || policyType === 'Term') {
+                        claimAmountInput.value = coverageAmount;
+                        claimAmountInput.readOnly = true; // Make read-only for full claim
+                        claimAmountInput.classList.add('bg-gray-200', 'cursor-not-allowed'); // Visual cue
+                        if (maxClaimSpan) maxClaimSpan.textContent = '(Full Claim)';
+                    } else {
+                        claimAmountInput.value = coverageAmount; // Default to full, but allow editing
+                        claimAmountInput.readOnly = false; // Make editable
+                        claimAmountInput.classList.remove('bg-gray-200', 'cursor-not-allowed');
+                        if (maxClaimSpan) maxClaimSpan.textContent = `(Max: ₹${parseFloat(coverageAmount).toLocaleString('en-IN')})`;
+                    }
+                    
+                    if (claimReasonTextarea) claimReasonTextarea.value = ''; // Clear previous reason
+                    if (claimAmountInput && !claimAmountInput.readOnly) claimAmountInput.focus(); // Focus only if editable
+                }
+            }
+        }
+
+
+        async function loadClaimAccounts(selectId) {
+            try {
+                const res = await fetch(`${BASE_URL}/accounts/summary`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    console.error('Failed to load accounts for claim:', errorData.message);
+                    document.getElementById(selectId).innerHTML = '<option value="">Error loading accounts</option>';
+                    document.getElementById(selectId).disabled = true;
+                    return;
+                }
+                const accounts = await res.json();
+                const select = document.getElementById(selectId);
+                select.innerHTML = accounts.map(a =>
+                    `<option value="${a._id}">${a.type} (****${a.accountNumber.slice(-4)}) - ₹${a.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>`
+                ).join('');
+                if (accounts.length === 0) {
+                    select.innerHTML = '<option value="">No accounts available</option>';
+                    select.disabled = true;
+                } else {
+                    select.disabled = false;
+                }
+
+            } catch (err) {
+                console.error('Error loading claim accounts:', err);
+                document.getElementById(selectId).innerHTML = '<option value="">Network error</option>';
+                document.getElementById(selectId).disabled = true;
+            }
+        }
+
+        async function fetchProductsAndAccounts() {
+            try {
+                const [productsRes, accountsRes] = await Promise.all([
+                    fetch(`${BASE_URL}/insurance/products`, { headers: { Authorization: `Bearer ${token}` } }),
+                    fetch(`${BASE_URL}/accounts/summary`, { headers: { Authorization: `Bearer ${token}` } })
+                ]);
+
+                if (!productsRes.ok) {
+                    const errorData = await productsRes.json();
+                    showMessage('Error', errorData.message || 'Failed to load insurance products.');
+                    return;
+                }
+                if (!accountsRes.ok) {
+                    const errorData = await accountsRes.json();
+                    showMessage('Error', errorData.message || 'Failed to load accounts for purchase.');
+                    return;
+                }
+
+                const products = await productsRes.json();
+                const accounts = await accountsRes.json();
+
+                const productIdSelect = document.getElementById('productId');
+                productIdSelect.innerHTML = products.map(p =>
+                    `<option value="${p._id}">${p.name} (${p.type}) - Coverage: ₹${parseFloat(p.coverageAmount).toLocaleString('en-IN')} @ Premium: ₹${parseFloat(p.premium).toLocaleString('en-IN')}/yr</option>`
+                ).join('');
+                if (products.length === 0) productIdSelect.innerHTML = '<option value="">No products available</option>';
+                else productIdSelect.disabled = false;
+
+                const accountIdSelect = document.getElementById('accountId');
+                accountIdSelect.innerHTML = accounts.map(a =>
+                    `<option value="${a._id}">${a.type} (****${a.accountNumber.slice(-4)}) - Balance: ₹${a.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>`
+                ).join('');
+                if (accounts.length === 0) {
+                    accountIdSelect.innerHTML = '<option value="">No accounts available</option>';
+                    accountIdSelect.disabled = true;
+                } else {
+                    accountIdSelect.disabled = false;
+                }
+
+            } catch (err) {
+                console.error('Error fetching products and accounts:', err);
+                showMessage('Network Error', 'Could not load necessary data for buying insurance. Please check your network connection.');
+            }
+        }
+
+        document.getElementById('buyForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const productId = document.getElementById('productId').value;
+            const accountId = document.getElementById('accountId').value;
+
+            if (!productId || !accountId) {
+                showMessage('Validation Error', 'Please select an insurance product and a payment account.');
+                return;
+            }
+
+            const body = { productId, accountId };
+
+            try {
+                const res = await fetch(`${BASE_URL}/insurance/buy`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(body)
+                });
+                const result = await res.json();
+                if (!res.ok) {
+                    showMessage('Purchase Failed', result.message || 'Failed to purchase policy.');
+                    return;
+                }
+                showMessage('Success', '✅ Insurance policy bought successfully!');
+                fetchInsurances(); // Refresh active policies
+                fetchProductsAndAccounts(); // Refresh accounts to reflect balance change
+                e.target.reset();
+            } catch (err) {
+                console.error('Error buying insurance:', err);
+                showMessage('Error', 'An unexpected error occurred while buying insurance.');
+            }
+        });
+
+        async function payPremium(policyId) {
+            showConfirmation('Confirm Premium Payment', 'Are you sure you want to pay the premium for this policy?', async () => {
+                try {
+                    const res = await fetch(`${BASE_URL}/insurance/pay-premium`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ policyId })
+                    });
+                    const result = await res.json();
+                    if (!res.ok) {
+                        showMessage('Payment Failed', result.message || 'Premium payment failed.');
+                        return;
+                    }
+                    showMessage('Success', '✅ Premium paid successfully!');
+                    fetchInsurances(); // Refresh policies
+                    fetchProductsAndAccounts(); // Refresh accounts
+                } catch (err) {
+                    console.error('Error paying premium:', err);
+                    showMessage('Error', 'An unexpected error occurred while paying premium.');
+                }
+            });
+        }
+
+        async function promptCancelPolicy(policyId) {
+            showConfirmation('Confirm Policy Cancellation', 'Are you sure you want to cancel this policy? This action cannot be undone.', async () => {
+                try {
+                    const res = await fetch(`${BASE_URL}/insurance/cancel/${policyId}`, {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const result = await res.json();
+                    if (!res.ok) {
+                        showMessage('Cancellation Failed', result.message || 'Policy cancellation failed.');
+                        return;
+                    }
+                    showMessage('Success', '✅ Policy cancelled successfully!');
+                    fetchInsurances(); // Refresh policies
+                } catch (err) {
+                    console.error('Error cancelling policy:', err);
+                    showMessage('Error', 'An unexpected error occurred during cancellation.');
+                }
+            });
+        }
+
+        async function promptClaimPolicy(policyId) {
+            const accountId = document.getElementById(`claimAccount-${policyId}`).value;
+            const claimAmountInput = document.getElementById(`claimAmount-${policyId}`);
+            const claimAmount = parseFloat(claimAmountInput.value);
+            const claimReason = document.getElementById(`claimReason-${policyId}`).value.trim();
+
+            if (!accountId || accountId === "") {
+                showMessage('Validation Error', 'Please select an account to receive the claim amount.');
+                return;
+            }
+            if (isNaN(claimAmount) || claimAmount <= 0) {
+                showMessage('Validation Error', 'Please enter a valid claim amount greater than zero.');
+                return;
+            }
+            if (!claimReason) {
+                showMessage('Validation Error', 'Please provide a reason for your claim.');
+                return;
+            }
+
+            // Get the policy type from the stored policies to determine if it's a full claim type
+            const policies = (await (await fetch(`${BASE_URL}/insurance/my-policies`, { headers: { Authorization: `Bearer ${token}` } })).json()).filter(p => p.status === 'Active');
+            const currentPolicy = policies.find(p => p._id === policyId);
+
+            if (!currentPolicy) {
+                showMessage('Error', 'Policy not found for claim validation.');
+                return;
+            }
+
+            const isFullClaimType = (currentPolicy.type === 'Life' || currentPolicy.type === 'Term');
+
+            // Additional validation for non-full claim types: ensure amount doesn't exceed coverage
+            if (!isFullClaimType && claimAmount > currentPolicy.coverageAmount) {
+                showMessage('Validation Error', `Claim amount cannot exceed policy coverage of ₹${parseFloat(currentPolicy.coverageAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`);
+                return;
+            }
+            // For full claim types, ensure the amount matches coverage (as input is read-only)
+            if (isFullClaimType && claimAmount !== currentPolicy.coverageAmount) {
+                 showMessage('Validation Error', 'For Life and Term policies, only full claims are allowed. Please ensure the amount matches the coverage.');
+                 return;
+            }
+
+
+            showConfirmation('Confirm Insurance Claim', `You are requesting to claim <strong>₹${claimAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> for policy: <strong>${currentPolicy.policyName} (${currentPolicy.type})</strong>.<br><br>Reason: "${claimReason}"<br><br>Are you sure you want to proceed?`, async () => {
+                try {
+                    const res = await fetch(`${BASE_URL}/insurance/claim/${policyId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ accountId, claimAmount, claimReason }) // Send amount and reason
+                    });
+                    const result = await res.json();
+                    if (!res.ok) {
+                        showMessage('Claim Failed', result.message || 'Insurance claim failed.');
+                        return;
+                    }
+                    showMessage('Success', '✅ Claim request submitted! Amount credited to your account.');
+                    fetchInsurances(); // Refresh policies
+                    fetchProductsAndAccounts(); // Refresh accounts
+                    toggleClaimForm(policyId); // Hide the form after successful submission
+                } catch (err) {
+                    console.error('Error claiming insurance:', err);
+                    showMessage('Error', 'An unexpected error occurred while claiming insurance.');
+                }
+            });
+        }
+
+        // Initial calls on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) {
+                showMessage('Authentication Required', 'You are not logged in. Please log in to access this page.', () => {
+                    window.location.href = 'login.html';
+                });
+                return;
+            }
+            fetchInsurances();
+            fetchProductsAndAccounts();
+        });
+    </script>
+
+</body>
+</html>
+
+
+
+

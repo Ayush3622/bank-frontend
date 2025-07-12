@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank - Offers & Rewards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance (if content overflows) */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <!-- Header - Standardized for MyBank pages -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    Offers & Rewards
+                </h1>
+            </div>
+            <div class="order-3">
+                <a href="recentalerts.html">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                        </svg>
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full space-y-8 main-content-area">
+            <!-- Reward Points -->
+            <section class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 sm:p-8 mb-6 shadow-lg text-white flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-semibold mb-2">Your Reward Points</h2>
+                    <p id="rewardPoints" class="text-4xl sm:text-5xl font-extrabold">Loading...</p>
+                </div>
+                <svg class="w-16 h-16 sm:w-20 sm:h-20 text-blue-200 opacity-75" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                </svg>
+            </section>
+
+            <!-- Offers -->
+            <section>
+                <h2 class="text-2xl font-bold mb-6 text-gray-900">Available Offers</h2>
+                <div id="offersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Offers will be loaded here by JavaScript -->
+                </div>
+                <p id="noOffersMessage" class="text-gray-500 text-center py-8 hidden">No active offers available at the moment. Check back soon!</p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+        const token = localStorage.getItem('token');
+
+        function loadRewards() {
+            if (!token) {
+                document.getElementById('rewardPoints').textContent = 'Login to view';
+                return;
+            }
+
+            fetch(`${BASE_URL}/offers-rewards/rewards`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Failed to fetch rewards');
+                }
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById('rewardPoints').textContent = `${data.rewardPoints.toLocaleString('en-IN')} Points`;
+            })
+            .catch(err => {
+                console.error('Error loading rewards:', err);
+                document.getElementById('rewardPoints').textContent = 'Error loading';
+            });
+        }
+
+        function loadOffers() {
+            fetch(`${BASE_URL}/offers-rewards/offers`)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Failed to fetch offers');
+                }
+                return res.json();
+            })
+            .then(offers => {
+                const container = document.getElementById('offersContainer');
+                const noOffersMessage = document.getElementById('noOffersMessage');
+                container.innerHTML = ''; // Clear previous offers
+
+                if (!offers.length) {
+                    noOffersMessage.classList.remove('hidden');
+                    return;
+                } else {
+                    noOffersMessage.classList.add('hidden');
+                }
+
+                offers.forEach(offer => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 flex flex-col justify-between'; // Enhanced card styling
+                    card.innerHTML = `
+                        <div>
+                            <h3 class="font-bold text-xl mb-2 text-gray-900">${offer.title}</h3>
+                            <p class="text-sm text-gray-700 mb-3 leading-relaxed">${offer.description || 'No description available.'}</p>
+                            <div class="text-xs text-gray-500 space-y-1 mb-4">
+                                <p><span class="font-medium">Merchant:</span> ${offer.merchant || 'N/A'}</p>
+                                <p><span class="font-medium">Category:</span> ${offer.category || 'General'}</p>
+                            </div>
+                        </div>
+                        ${offer.link ? `
+                            <div class="mt-auto pt-4 border-t border-gray-100">
+                                <a href="${offer.link}" target="_blank" class="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-sm shadow-md">
+                                    View Offer
+                                </a>
+                            </div>
+                        ` : ''}
+                    `;
+                    container.appendChild(card);
+                });
+            })
+            .catch(err => {
+                console.error('Error loading offers:', err);
+                document.getElementById('offersContainer').innerHTML = '<p class="text-red-600 text-center py-8">Failed to load offers. Please try again later.</p>';
+                document.getElementById('noOffersMessage').classList.add('hidden'); // Hide no offers message if there's an error
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadRewards();
+            loadOffers();
+        });
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MyBank - Deposits</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom styles for form inputs to ensure consistent appearance and responsiveness */
+    .form-input {
+      width: 100%;
+      border: 1px solid #d1d5db; /* border-gray-300 */
+      padding: 0.75rem 1rem; /* px-4 py-3 */
+      border-radius: 0.5rem; /* rounded-lg */
+      transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #60a5fa; /* ring-blue-400 */
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col font-sans text-gray-800">
+
+  <div class="flex-1 flex flex-col w-full overflow-hidden">
+    <!-- Header - Keeping as per user request -->
+    <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+      <div class="order-1 sm:order-none">
+        <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200">
+          <svg class="w-6 h-6 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+          </svg>
+          <div class="hidden sm:flex items-center font-medium">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+            </svg>
+            Dashboard
+          </div>
+        </a>
+      </div>
+      <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+          Deposit Management
+        </h1>
+      </div>
+      <div class="order-3">
+        <a href="recentalerts.html">
+          <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+            </svg>
+          </button>
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full space-y-10">
+
+      <!-- Deposits Section -->
+      <section>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Your Deposits</h2>
+        <div id="depositsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Deposit cards will be loaded here by JavaScript -->
+        </div>
+        <p id="noDepositsMessage" class="text-center py-8 text-lg font-medium text-gray-500 hidden">You have no active deposits.</p>
+      </section>
+
+      <!-- New Deposit Form -->
+      <section class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-blue-100">
+        <h2 class="text-xl font-bold mb-6 text-gray-800">Open a New Deposit</h2>
+        <form id="depositForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div>
+            <label for="depositType" class="block text-sm font-medium text-gray-700 mb-1">Deposit Type</label>
+            <select id="depositType" class="form-input" required>
+              <option value="">Select type</option>
+              <option value="FD">Fixed Deposit</option>
+              <option value="RD">Recurring Deposit</option>
+            </select>
+          </div>
+          <div>
+            <label for="depositAmount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+            <input type="number" id="depositAmount" min="1000" class="form-input" placeholder="e.g., 50000" required />
+          </div>
+          <div>
+            <label for="depositTerm" class="block text-sm font-medium text-gray-700 mb-1">Duration (Months)</label>
+            <input type="number" id="depositTerm" min="6" max="120" class="form-input" placeholder="e.g., 60" required />
+          </div>
+          <div class="sm:col-span-2 lg:col-span-1">
+            <label for="accountSelect" class="block text-sm font-medium text-gray-700 mb-1">Link to Account</label>
+            <select id="accountSelect" class="form-input" required></select>
+          </div>
+          <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center sm:justify-end pt-4">
+            <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 hover:shadow-xl transition-all duration-200 font-semibold">Open Deposit</button>
+          </div>
+        </form>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Message Box Modal (for simple alerts/success) -->
+  <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 ease-out">
+      <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm mx-auto transform scale-95 opacity-0 transition-all duration-300 ease-out"
+           id="messageBoxContent">
+          <h3 id="messageTitle" class="text-2xl font-bold mb-4 text-gray-900"></h3>
+          <p id="messageText" class="text-gray-700 text-base mb-6 leading-relaxed"></p>
+          <div class="flex justify-end">
+              <button onclick="closeMessage()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+                  OK
+              </button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Confirmation Box Modal (for Yes/No confirmations) -->
+  <div id="confirmationBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 ease-out">
+      <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-lg mx-auto transform scale-95 opacity-0 transition-all duration-300 ease-out"
+           id="confirmationBoxContent">
+          <h3 id="confirmationTitle" class="text-2xl font-bold mb-4 text-gray-900"></h3>
+          <p id="confirmationText" class="text-gray-700 text-base mb-6 leading-relaxed"></p>
+          <div class="flex justify-end space-x-3">
+              <button id="confirmCancelBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all duration-200">
+                  No
+              </button>
+              <button id="confirmYesBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-200">
+                  Yes
+              </button>
+          </div>
+      </div>
+  </div>
+
+<script>
+const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+const token = localStorage.getItem('token');
+
+// Element references for Deposits
+const depositsGrid = document.getElementById('depositsGrid');
+const noDepositsMessage = document.getElementById('noDepositsMessage');
+
+// Element references for Deposit Form
+const depositForm = document.getElementById('depositForm');
+const depositType = document.getElementById('depositType');
+const depositAmount = document.getElementById('depositAmount');
+const depositTerm = document.getElementById('depositTerm');
+const accountSelect = document.getElementById('accountSelect');
+
+// Element references for Message Box Modal (for simple alerts)
+const messageBox = document.getElementById('messageBox');
+const messageBoxContent = document.getElementById('messageBoxContent');
+const messageTitle = document.getElementById('messageTitle');
+const messageText = document.getElementById('messageText');
+
+// Element references for Confirmation Box Modal (for Yes/No confirmations)
+const confirmationBox = document.getElementById('confirmationBox');
+const confirmationBoxContent = document.getElementById('confirmationBoxContent');
+const confirmationTitle = document.getElementById('confirmationTitle');
+const confirmationText = document.getElementById('confirmationText');
+const confirmYesBtn = document.getElementById('confirmYesBtn');
+const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+let onConfirmAction = null; // Stores the callback for confirmation
+
+
+// --- General Message Box Functions (for simple alerts/success) ---
+function showMessage(title, text, callback = null) {
+    messageTitle.textContent = title;
+    messageText.textContent = text;
+    messageBox.classList.remove('hidden');
+    // Trigger transition for content
+    setTimeout(() => {
+        messageBoxContent.classList.remove('opacity-0', 'scale-95');
+        messageBoxContent.classList.add('opacity-100', 'scale-100');
+    }, 10); // Small delay to allow 'hidden' to be removed first
+
+    const okButton = messageBox.querySelector('button');
+    okButton.onclick = () => {
+        closeMessage();
+        if (callback) callback();
+    };
+}
+
+function closeMessage() {
+    messageBoxContent.classList.remove('opacity-100', 'scale-100');
+    messageBoxContent.classList.add('opacity-0', 'scale-95');
+    setTimeout(() => {
+        messageBox.classList.add('hidden');
+        // Reset OK button's onclick to default for safety
+        messageBox.querySelector('button').onclick = () => messageBox.classList.add('hidden');
+    }, 300); // Wait for transition to complete before hiding
+}
+
+// --- Confirmation Box Functions (for Yes/No prompts) ---
+function showConfirmation(title, text, onConfirmCallback) {
+    confirmationTitle.textContent = title;
+    // FIX: Use innerHTML to render HTML content
+    confirmationText.innerHTML = text;
+    onConfirmAction = onConfirmCallback; // Store the callback
+
+    confirmationBox.classList.remove('hidden');
+    setTimeout(() => {
+        confirmationBoxContent.classList.remove('opacity-0', 'scale-95');
+        confirmationBoxContent.classList.add('opacity-100', 'scale-100');
+    }, 10);
+
+    // Set event listeners for confirmation buttons
+    confirmYesBtn.onclick = () => {
+        closeConfirmation();
+        if (onConfirmAction) {
+            onConfirmAction();
+        }
+    };
+    confirmCancelBtn.onclick = () => {
+        closeConfirmation();
+        // No action on cancel, just close
+    };
+}
+
+function closeConfirmation() {
+    confirmationBoxContent.classList.remove('opacity-100', 'scale-100');
+    confirmationBoxContent.classList.add('opacity-0', 'scale-95');
+    setTimeout(() => {
+        confirmationBox.classList.add('hidden');
+        onConfirmAction = null; // Clear the callback
+        confirmYesBtn.onclick = null; // Clear listeners for safety
+        confirmCancelBtn.onclick = null;
+    }, 300);
+}
+
+
+async function loadDeposits() {
+  try {
+    const res = await fetch(`${BASE_URL}/deposits`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        showMessage('Error', errorData.message || 'Failed to load deposits.');
+        return;
+    }
+
+    const deposits = await res.json();
+    depositsGrid.innerHTML = ''; // Clear existing deposits
+
+    if (deposits.length === 0) {
+      noDepositsMessage.classList.remove('hidden');
+    } else {
+      noDepositsMessage.classList.add('hidden');
+      deposits.forEach(deposit => {
+        // Calculate maturity status
+        const today = new Date();
+        const maturityDate = new Date(deposit.maturityDate);
+        const isMature = today >= maturityDate;
+        const statusClass = isMature ? 'text-green-600' : 'text-blue-600';
+
+        depositsGrid.innerHTML += `
+          <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200 space-y-4 transform transition-all duration-300 hover:shadow-lg hover:scale-105">
+            <div class="flex justify-between items-center border-b pb-4">
+              <h3 class="text-xl font-bold text-gray-800">${deposit.type} Deposit</h3>
+              <span class="font-semibold text-2xl text-blue-600">₹${parseFloat(deposit.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+            <div class="space-y-2 text-sm text-gray-600">
+              <p>Duration: <span class="font-medium">${deposit.durationMonths} months</span></p>
+              <p>Interest Rate: <span class="font-medium">${parseFloat(deposit.interestRate).toFixed(2)}%</span></p>
+              <p>Status: <span class="capitalize font-semibold ${statusClass}">${isMature ? 'Matured' : 'Active'}</span></p>
+              <p>Maturity: <span class="font-medium">${new Date(deposit.maturityDate).toLocaleDateString('en-IN')}</span></p>
+            </div>
+            <div class="flex gap-2 pt-4 border-t">
+              <button class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors duration-200 shadow" onclick="promptCloseDeposit('${deposit._id}')">
+                Close & Credit
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+  } catch (err) {
+    console.error('Error loading deposits:', err);
+    showMessage('Error', 'Failed to load deposits. Please check your network connection.');
+  }
+}
+
+async function loadAccounts() {
+  try {
+    const res = await fetch(`${BASE_URL}/accounts/summary`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        showMessage('Error', errorData.message || 'Failed to load accounts.');
+        return;
+    }
+
+    const accounts = await res.json();
+    accountSelect.innerHTML = ''; // Clear previous options
+    if (accounts.length === 0) {
+        accountSelect.innerHTML = '<option value="">No accounts available</option>';
+        accountSelect.disabled = true;
+    } else {
+        accountSelect.disabled = false;
+        accountSelect.innerHTML = accounts.map(a =>
+            `<option value="${a._id}">A/C ${a.accountNumber} - Balance: ₹${a.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>`
+        ).join('');
+    }
+  } catch (err) {
+    console.error('Error loading accounts:', err);
+    showMessage('Error', 'Could not load accounts. Please try again.');
+  }
+}
+
+depositForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (!depositType.value || !depositAmount.value || !depositTerm.value || !accountSelect.value) {
+    showMessage('Validation Error', 'Please fill in all deposit form fields.');
+    return;
+  }
+
+  const amount = parseFloat(depositAmount.value);
+  const term = parseInt(depositTerm.value);
+
+  if (amount < 1000 || isNaN(amount)) {
+      showMessage('Validation Error', 'Deposit amount must be at least ₹1,000.');
+      return;
+  }
+  if (term < 6 || term > 120 || isNaN(term)) {
+      showMessage('Validation Error', 'Duration must be between 6 and 120 months.');
+      return;
+  }
+
+  const interestRate = depositType.value === 'FD' ? 6.5 : 6.0; // Fixed rates
+  const body = {
+    type: depositType.value,
+    amount: amount,
+    durationMonths: term,
+    interestRate: interestRate,
+    accountId: accountSelect.value
+  };
+
+  try {
+    const res = await fetch(`${BASE_URL}/deposits`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+      showMessage('Success', 'Deposit opened successfully! Your funds have been transferred.');
+      depositForm.reset();
+      loadDeposits(); // Reload deposits to show the new one
+      loadAccounts(); // Reload accounts to reflect updated balance
+    } else {
+      const errorData = await res.json();
+      showMessage('Error', errorData.message || 'Failed to open deposit. Please try again.');
+    }
+  } catch (err) {
+    console.error('Error opening deposit:', err);
+    showMessage('Error', 'An unexpected error occurred while opening the deposit.');
+  }
+});
+
+// Function to prompt confirmation before closing deposit
+async function promptCloseDeposit(depositId) {
+    try {
+        const res = await fetch(`${BASE_URL}/deposits/${depositId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            showMessage('Error', errorData.message || 'Failed to fetch deposit details for closure.');
+            return;
+        }
+
+        const deposit = await res.json();
+
+        const principal = parseFloat(deposit.amount);
+        const rate = parseFloat(deposit.interestRate);
+
+        const today = new Date();
+        const maturityDate = new Date(deposit.maturityDate);
+
+        // Exact backend match: use date only for comparison
+        const isMature = today.setHours(0,0,0,0) >= maturityDate.setHours(0,0,0,0);
+
+        let earnedInterest = 0;
+        if (isMature) {
+            earnedInterest = (principal * rate * (deposit.durationMonths / 12)) / 100;
+        } else {
+            const createdAt = new Date(deposit.createdAt);
+            const elapsedMonths =
+                (today.getFullYear() - createdAt.getFullYear()) * 12 +
+                (today.getMonth() - createdAt.getMonth());
+            const validMonths = Math.max(0, elapsedMonths);
+            const timeYears = validMonths / 12;
+            earnedInterest = (principal * rate * timeYears) / 100;
+        }
+
+        const penalty = isMature ? 0 : principal * 0.01;
+        let payout = principal + earnedInterest - penalty;
+        if (payout < principal) payout = principal; // Payout should not be less than principal
+
+        const confirmMsg = `
+            <div class="text-left">
+                <p><strong>Principal:</strong> ₹${principal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p><strong>Earned Interest:</strong> ₹${earnedInterest.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p><strong>Penalty (if early):</strong> -₹${penalty.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <hr class="my-2 border-gray-300">
+                <p class="text-xl font-bold">Final Payout: ₹${payout.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p class="mt-4">Are you sure you want to close this deposit now?</p>
+            </div>
+        `.trim();
+
+        showConfirmation('Confirm Deposit Closure', confirmMsg, async () => {
+            // This code runs ONLY if the user clicks "Yes"
+            try {
+                const closeRes = await fetch(`${BASE_URL}/deposits/${depositId}/close`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (closeRes.ok) {
+                    showMessage('Success', 'Deposit closed and amount credited to your account.');
+                    loadDeposits(); // Refresh deposits list
+                    loadAccounts(); // Refresh accounts balance
+                } else {
+                    const err = await closeRes.json();
+                    showMessage('Error', err.message || 'Failed to close deposit.');
+                }
+            } catch (err) {
+                console.error('Error during deposit closure:', err);
+                showMessage('Error', 'An unexpected error occurred during deposit closure.');
+            }
+        });
+
+    } catch (err) {
+        console.error('Error fetching deposit details for confirmation:', err);
+        showMessage('Error', 'Something went wrong while preparing to close the deposit.');
+    }
+}
+
+
+// --- Initial Load ---
+document.addEventListener('DOMContentLoaded', () => {
+    if (!token) {
+        showMessage('Authentication Required', 'You are not logged in. Please log in to access this page.', () => {
+            window.location.href = 'login.html';
+        });
+        return;
+    }
+    loadDeposits();
+    loadAccounts();
+});
+</script>
+</body>
+</html>

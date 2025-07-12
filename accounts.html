@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MyBank - Account Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Keep your entire existing CSS unchanged */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      min-height: 100vh;
+      display: flex;
+    }
+    .main-content-area::-webkit-scrollbar {
+      width: 8px;
+    }
+    .main-content-area::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    .main-content-area::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+    .main-content-area::-webkit-scrollbar-thumb:hover {
+      background: #555;
+      cursor: pointer;
+    }
+    .transition-all-fast {
+      transition: all 0.15s ease-in-out;
+    }
+    .account-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .account-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    .account-card-header {
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #edf2f7;
+    }
+    .account-card-body {
+      padding: 1.5rem;
+    }
+    .account-card-footer {
+      padding: 1.5rem;
+      border-top: 1px solid #edf2f7;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .border-checking { border-left-color: #3B82F6; }
+    .border-savings { border-left-color: #10B981; }
+    .border-business { border-left-color: #F97316; }
+    .account-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-in-out;
+    }
+    .account-details.open {
+      max-height: 500px;
+      transition: max-height 0.5s ease-in-out;
+    }
+    .account-form {
+      width: 100%;
+      max-width: 800px;
+      margin: 24px auto;
+      padding: 24px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      display: grid;
+      gap: 16px;
+    }
+    .account-form h2 {
+      grid-column: span 2;
+      text-align: center;
+    }
+    .account-form label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .account-form input,
+    .account-form select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    .account-form .full-width {
+      grid-column: span 2;
+      text-align: center;
+    }
+    .account-form button {
+      padding: 12px 24px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .account-form button:hover {
+      background-color: #357ad9;
+    }
+    @media (max-width: 767px) {
+      .account-form {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (min-width: 768px) {
+      .account-form {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+
+  <div class="flex-1 flex flex-col w-full overflow-hidden">
+    <!-- Top Bar same as yours -->
+    <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+      <div class="order-1 sm:order-none">
+        <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-all-fast">
+          <svg class="w-6 h-6 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+          </svg>
+          <div class="hidden sm:flex items-center font-medium">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+            </svg>
+            Dashboard
+          </div>
+        </a>
+      </div>
+      <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+          Account Management
+        </h1>
+      </div>
+      <div class="order-3">
+        <a href="recentalerts.html">
+          <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-all-fast shadow-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+            </svg>
+          </button>
+        </a>
+      </div>
+    </header>
+
+    <main class="p-6 max-w-6xl mx-auto">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Accounts</h2>
+      <div id="account-section" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+    </main>
+
+    <form id="accountForm" class="account-form">
+      <h2>Create a New Account</h2>
+      <div>
+        <label for="accountHolder">Account Holder</label>
+        <input type="text" id="accountHolder" name="accountHolder" required />
+      </div>
+      <div>
+        <label for="type">Account Type</label>
+        <select id="type" name="type" required>
+          <option value="">Select type</option>
+          <option value="Savings">Savings</option>
+          <option value="Current">Current</option>
+          <option value="Business">Business</option>
+        </select>
+      </div>
+      <!-- ✅ Branch Select added here -->
+      <div>
+        <label for="branch">Branch</label>
+        <select id="branch" name="branch" required>
+          <option value="">Select Branch</option>
+          <option value="Kolkata">Kolkata</option>
+          <option value="Mumbai">Mumbai</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Bangalore">Bangalore</option>
+          <option value="Chennai">Chennai</option>
+          <option value="Hyderabad">Hyderabad</option>
+        </select>
+      </div>
+      <div>
+        <label for="balance">Initial Deposit Amount</label>
+        <input type="number" id="balance" name="balance" required />
+      </div>
+      <div class="full-width">
+        <button type="submit">Create Account</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api'; 
+
+    function getBorderClass(type) {
+      const map = {
+        current: 'border-checking',
+        savings: 'border-savings',
+        business: 'border-business'
+      };
+      return map[type.toLowerCase()] || 'border-checking';
+    }
+
+    function createAccountCard(account) {
+      const card = document.createElement('div');
+      card.className = `account-card border-l-8 ${getBorderClass(account.type)}`;
+      card.setAttribute('data-account-type', account.type.toLowerCase());
+
+      const maskedNumber = account.accountNumber;
+      const openingDate = new Date(account.createdAt).toLocaleDateString('en-IN', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      card.innerHTML = `
+        <div class="account-card-header">
+          <h3 class="text-2xl font-bold text-gray-800">${account.type} Account</h3>
+          <span class="font-semibold text-xl text-blue-600 ml-4">₹${account.balance.toLocaleString('en-IN')}</span>
+        </div>
+        <div class="account-card-body pb-0">
+          <p class="text-gray-600 mb-1">Account Number: <span class="font-mono">${maskedNumber}</span></p>
+          <p class="text-gray-600 mb-1">Account Holder: ${account.accountHolder}</p>
+          <p class="text-gray-600 mb-4">Account Type: Personal ${account.type}</p>
+          <div class="account-details">
+            <p class="text-gray-600 mb-1">Available Balance: <span class="font-semibold text-blue-700">₹${account.balance.toLocaleString('en-IN')}</span></p>
+            <p class="text-gray-600 mb-1">Interest Rate: ${(account.interestRate * 100).toFixed(2)}% APY</p>
+            <p class="text-gray-600 mb-1">Opening Date: ${openingDate}</p>
+            <p class="text-gray-600 mb-1">Branch: ${account.branch}</p>
+          </div>
+        </div>
+        <div class="account-card-footer">
+          <button class="toggle-details-button bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md text-sm flex items-center transition-all-fast">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+            More Details
+          </button>
+        </div>
+      `;
+      return card;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('account-section');
+      const form = document.getElementById('accountForm');
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        container.innerHTML = `<p class="text-red-600">You must be logged in to view account data.</p>`;
+        return;
+      }
+
+      function reloadAccounts() {
+        fetch(`${BASE_URL}/accounts/summary`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(accounts => {
+          container.innerHTML = '';
+
+          if (!Array.isArray(accounts) || accounts.length === 0) {
+            container.innerHTML = `<p class="text-gray-600">No accounts found for this user.</p>`;
+            return;
+          }
+
+          accounts.forEach(account => {
+            const card = createAccountCard(account);
+            container.appendChild(card);
+          });
+
+          document.querySelectorAll('.toggle-details-button').forEach(btn => {
+            btn.addEventListener('click', (event) => {
+              const card = event.target.closest('.account-card');
+              const details = card.querySelector('.account-details');
+              const icon = btn.querySelector('svg path');
+              details.classList.toggle('open');
+              icon.setAttribute('d', details.classList.contains('open') ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7');
+            });
+          });
+        })
+        .catch(err => {
+          console.error('Error fetching accounts:', err);
+          container.innerHTML = `<p class="text-red-600">Failed to load account data.</p>`;
+        });
+      }
+
+      reloadAccounts();
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+          const res = await fetch(`${BASE_URL}/accounts/create`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+          });
+
+          if (!res.ok) {
+            const error = await res.json();
+            alert(error.message || 'Account creation failed');
+            return;
+          }
+
+          const result = await res.json();
+          alert(`✅ Account created: ${result.account.accountNumber}`);
+          form.reset();
+          reloadAccounts();
+        } catch (err) {
+          console.error('Account creation error:', err);
+          alert('Something went wrong while creating the account.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+

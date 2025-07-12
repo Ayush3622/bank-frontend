@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank - Loans</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for form inputs to ensure consistent appearance and responsiveness */
+        .form-input {
+            width: 100%;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #60a5fa; /* ring-blue-400 */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+        }
+
+        /* Custom styles for faster transitions */
+        .transition-all-fast {
+            transition: all 0.15s ease-in-out;
+        }
+
+        /* Styling for modal content animation */
+        .modal-content-animation {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+        .modal-content-animation.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col font-sans text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <!-- Header - Keeping as per user request -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    Loan Management
+                </h1>
+            </div>
+            <div class="order-3">
+                <a href="recentalerts.html">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                        </svg>
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl mx-auto space-y-10 w-full">
+
+            <!-- Loans Section -->
+            <section>
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Your Loans</h2>
+                <div id="loansGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Loan cards will be loaded here by JavaScript -->
+                </div>
+                <p id="noLoansMessage" class="text-center py-8 text-lg font-medium text-gray-500 hidden">You have no active loans.</p>
+            </section>
+
+            <!-- New Loan Application Form -->
+            <section class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-blue-100">
+                <h2 class="text-xl font-bold mb-6 text-gray-800">Apply for a New Loan</h2>
+                <form id="loanForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label for="loanType" class="block text-sm font-medium text-gray-700 mb-1">Loan Type</label>
+                        <select id="loanType" class="form-input" required>
+                            <option value="">Select Loan Type</option>
+                            <option value="Home">Home Loan</option>
+                            <option value="Personal">Personal Loan</option>
+                            <option value="Car">Car Loan</option>
+                            <option value="Education">Education Loan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="loanAmount" class="block text-sm font-medium text-gray-700 mb-1">Loan Amount (₹)</label>
+                        <input type="number" id="loanAmount" min="1000" class="form-input" placeholder="e.g., 500000" required/>
+                    </div>
+                    <div>
+                        <label for="loanDurationMonths" class="block text-sm font-medium text-gray-700 mb-1">Duration (Months)</label>
+                        <input type="number" id="loanDurationMonths" min="12" max="360" class="form-input" placeholder="e.g., 60 (5 years)" required/>
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-1">
+                        <label for="loanDescription" class="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                        <textarea id="loanDescription" rows="3" class="form-input resize-y" placeholder="Purpose of the loan, any specific notes..."></textarea>
+                    </div>
+                    <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center sm:justify-end pt-4">
+                        <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 hover:shadow-xl transition-all duration-200 font-semibold">Apply for Loan</button>
+                    </div>
+                </form>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- General Message Box Modal -->
+    <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm mx-auto modal-content-animation"
+             id="messageBoxContent">
+            <h3 id="messageTitle" class="text-2xl font-bold mb-4 text-gray-900"></h3>
+            <p id="messageText" class="text-gray-700 text-base mb-6 leading-relaxed"></p>
+            <div class="flex justify-end">
+                <button onclick="closeMessage()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pay EMI Modal -->
+    <div id="payEmiModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl max-w-md w-full space-y-6 modal-content-animation"
+             id="payEmiModalContent">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Pay EMI</h3>
+            <form id="payEmiForm" class="space-y-5">
+                <input type="hidden" id="currentLoanId"/>
+                <div>
+                    <label for="emiAccountSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+                    <select id="emiAccountSelect" class="form-input"></select>
+                    <p id="emiAccountBalance" class="text-sm text-gray-500 mt-1">Balance: ₹0.00</p>
+                </div>
+                <div>
+                    <label for="emiAmount" class="block text-sm font-medium text-gray-700 mb-1">Amount to Pay (₹)</label>
+                    <input type="number" id="emiAmount" min="1" class="form-input" placeholder="e.g., 5000"/>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closePayEmiModal()" class="bg-gray-300 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-400 transition-all font-medium focus:outline-none focus:ring-2 focus:ring-gray-400">Cancel</button>
+                    <button type="submit" class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition-all font-medium focus:outline-none focus:ring-2 focus:ring-green-400">Confirm Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+    const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+    const token = localStorage.getItem('token');
+
+    // Element references for Loan Grid
+    const loansGrid = document.getElementById('loansGrid');
+    const noLoansMessage = document.getElementById('noLoansMessage');
+
+    // Element references for Loan Application Form
+    const loanForm = document.getElementById('loanForm');
+    const loanType = document.getElementById('loanType');
+    const loanAmount = document.getElementById('loanAmount');
+    const loanDurationMonths = document.getElementById('loanDurationMonths');
+    const loanDescription = document.getElementById('loanDescription');
+
+    // Element references for General Message Box Modal
+    const messageBox = document.getElementById('messageBox');
+    const messageBoxContent = document.getElementById('messageBoxContent');
+    const messageTitle = document.getElementById('messageTitle');
+    const messageText = document.getElementById('messageText');
+
+    // Element references for Pay EMI Modal
+    const payEmiModal = document.getElementById('payEmiModal');
+    const payEmiModalContent = document.getElementById('payEmiModalContent');
+    const payEmiForm = document.getElementById('payEmiForm');
+    const currentLoanId = document.getElementById('currentLoanId');
+    const emiAccountSelect = document.getElementById('emiAccountSelect');
+    const emiAmountInput = document.getElementById('emiAmount');
+    const emiAccountBalance = document.getElementById('emiAccountBalance');
+
+    let availableAccounts = []; // To store accounts for EMI payment dropdown
+
+    // Fixed interest rates based on loan type
+    const LOAN_INTEREST_RATES = {
+        'Home': 7.5, // Example rate
+        'Personal': 12.0, // Example rate
+        'Car': 9.0, // Example rate
+        'Education': 8.0 // Example rate
+    };
+
+    // --- General Message Box Functions ---
+    function showMessage(title, text, callback = null) {
+        messageTitle.textContent = title;
+        messageText.textContent = text;
+        messageBox.classList.remove('hidden');
+        // Trigger transition for content
+        setTimeout(() => {
+            messageBoxContent.classList.add('show');
+        }, 10); // Small delay to allow 'hidden' to be removed first
+
+        const okButton = messageBox.querySelector('button');
+        okButton.onclick = () => {
+            closeMessage();
+            if (callback) callback();
+        };
+    }
+
+    function closeMessage() {
+        messageBoxContent.classList.remove('show');
+        setTimeout(() => {
+            messageBox.classList.add('hidden');
+            // Reset OK button's onclick to default for safety
+            messageBox.querySelector('button').onclick = () => messageBox.classList.add('hidden');
+        }, 300); // Wait for transition to complete before hiding
+    }
+
+    // --- Pay EMI Modal Functions ---
+    async function openPayEmiModal(loanId) {
+        currentLoanId.value = loanId; // Store the loan ID
+
+        // Clear previous balance info
+        emiAccountBalance.textContent = 'Balance: ₹0.00';
+        emiAmountInput.value = ''; // Clear previous amount
+
+        // Load accounts if not already loaded or if a refresh is needed
+        if (availableAccounts.length === 0) {
+            await loadAccountsForEmi();
+        } else {
+            populateEmiAccountSelect();
+        }
+
+        payEmiModal.classList.remove('hidden');
+        setTimeout(() => {
+            payEmiModalContent.classList.add('show');
+        }, 10);
+    }
+
+    function closePayEmiModal() {
+        payEmiModalContent.classList.remove('show');
+        setTimeout(() => {
+            payEmiModal.classList.add('hidden');
+            payEmiForm.reset(); // Reset the form fields
+        }, 300);
+    }
+
+    // Function to load user's accounts for the EMI payment dropdown
+    async function loadAccountsForEmi() {
+        try {
+            const res = await fetch(`${BASE_URL}/accounts/summary`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) {
+                const errorData = await res.json();
+                showMessage('Error', errorData.message || 'Failed to load accounts.');
+                return;
+            }
+            availableAccounts = await res.json();
+            populateEmiAccountSelect();
+        } catch (err) {
+            console.error('Error loading accounts for EMI:', err);
+            showMessage('Error', 'Could not load accounts for EMI. Please try again.');
+        }
+    }
+
+    // Function to populate the EMI account select dropdown
+    function populateEmiAccountSelect() {
+        emiAccountSelect.innerHTML = '';
+        if (availableAccounts.length === 0) {
+            emiAccountSelect.innerHTML = '<option value="">No accounts available</option>';
+            emiAccountSelect.disabled = true;
+            emiAccountBalance.textContent = 'Balance: N/A';
+            emiAmountInput.disabled = true;
+        } else {
+            emiAccountSelect.disabled = false;
+            emiAmountInput.disabled = false;
+            emiAccountSelect.innerHTML = availableAccounts.map(a =>
+                `<option value="${a._id}" data-balance="${a.balance}">A/C ${a.accountNumber} - Balance: ₹${a.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>`
+            ).join('');
+            // Trigger change to update balance display for the first selected account
+            emiAccountSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Event listener for EMI account selection change to update balance display
+    emiAccountSelect.addEventListener('change', () => {
+        const selectedOption = emiAccountSelect.options[emiAccountSelect.selectedIndex];
+        if (selectedOption) {
+            const balance = parseFloat(selectedOption.dataset.balance || 0);
+            emiAccountBalance.textContent = `Balance: ₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        } else {
+            emiAccountBalance.textContent = 'Balance: ₹0.00';
+        }
+    });
+
+    // --- EMI Calculation Function ---
+    function calculateEMI(principal, annualInterestRate, durationMonths) {
+        if (principal <= 0 || durationMonths <= 0) return 0;
+
+        const monthlyInterestRate = annualInterestRate / 100 / 12;
+
+        if (monthlyInterestRate === 0) {
+            return principal / durationMonths; // Simple division if interest rate is 0
+        }
+
+        const emi = principal * monthlyInterestRate *
+                            (Math.pow(1 + monthlyInterestRate, durationMonths) /
+                            (Math.pow(1 + monthlyInterestRate, durationMonths) - 1));
+        return emi;
+    }
+
+    // --- Loan Management Functions ---
+    // Load and display all loans for the user
+    async function loadLoans() {
+        try {
+            const res = await fetch(`${BASE_URL}/loans`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                if (res.status === 401) {
+                    showMessage('Authentication Error', 'You are not logged in. Please log in to view your loans.', () => {
+                        window.location.href = 'login.html';
+                    });
+                } else {
+                    const errorData = await res.json();
+                    showMessage('Error', errorData.message || 'Failed to load loans.');
+                }
+                return;
+            }
+
+            const allLoans = await res.json();
+            // Filter out loans with 'Closed' status
+            const activeLoans = allLoans.filter(loan => loan.status !== 'Closed');
+
+            loansGrid.innerHTML = ''; // Clear existing loans before rendering
+            if (activeLoans.length === 0) {
+                noLoansMessage.classList.remove('hidden');
+            } else {
+                noLoansMessage.classList.add('hidden');
+                activeLoans.forEach(loan => {
+                    let actionButton = '';
+                    let emiDisplay = '';
+
+                    if (loan.status === 'Active') {
+                        const emi = calculateEMI(loan.amount, loan.interestRate, loan.durationMonths);
+                        emiDisplay = `<p>Monthly EMI: <span class="font-medium text-green-700">₹${emi.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>`;
+                        actionButton = `
+                            <button class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md text-sm transition-all-fast focus:outline-none focus:ring-2 focus:ring-green-400"
+                                onclick="openPayEmiModal('${loan._id}')">
+                                Pay EMI
+                            </button>
+                        `;
+                    } else if (loan.status === 'Closed') {
+                        // This block will theoretically not be reached for 'Closed' loans due to the filter,
+                        // but kept for completeness if filter logic changes or for future reference.
+                        actionButton = `
+                            <span class="inline-flex items-center rounded-full bg-gray-200 px-3 py-0.5 text-sm font-medium text-gray-800">
+                                Loan Closed
+                            </span>
+                        `;
+                    }
+
+                    const previewAmount = loan.previewRemainingAmount ?? loan.remainingAmount;
+                    const interestNote = loan.accruedInterestPreview > 0
+                        ? `<p class="text-xs text-gray-500">(Includes ₹${parseFloat(loan.accruedInterestPreview).toFixed(2)} interest)</p>`
+                        : '';
+
+                    loansGrid.innerHTML += `
+                        <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200 space-y-4 transform transition-all duration-300 hover:shadow-lg hover:scale-105">
+                            <div class="flex justify-between items-center border-b pb-4">
+                                <h3 class="text-xl font-bold text-gray-800">${loan.type} Loan</h3>
+                                <span class="font-semibold text-2xl text-blue-600">₹${parseFloat(previewAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </div>
+                            <div class="space-y-2 text-sm text-gray-600">
+                                <p>Original Amount: <span class="font-medium">₹${parseFloat(loan.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>
+                                <p>Duration: <span class="font-medium">${loan.durationMonths} months</span></p>
+                                <p>Interest Rate: <span class="font-medium">${parseFloat(loan.interestRate).toFixed(2)}%</span></p>
+                                ${emiDisplay}
+                                <p>Status: <span class="capitalize font-semibold text-${loan.status === 'Active' ? 'blue' : 'gray'}-600">${loan.status}</span></p>
+                                <p>Remaining Outstanding: <span class="font-medium text-blue-800">₹${parseFloat(previewAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>
+                                ${interestNote}
+                                <p>Applied On: <span class="font-medium">${new Date(loan.createdAt).toLocaleDateString('en-IN')}</span></p>
+                                ${loan.description ? `<p>Description: <span class="font-medium">${loan.description}</span></p>` : ''}
+                            </div>
+                            <div class="flex gap-2 pt-4 border-t">
+                                ${actionButton}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        } catch (err) {
+            console.error('Error loading loans:', err);
+            showMessage('Error', 'Failed to load loans. Please check your network connection.');
+        }
+    }
+
+
+    // Handle new loan application form submission
+    loanForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Basic client-side validation
+        if (!loanType.value || !loanAmount.value || !loanDurationMonths.value) {
+            showMessage('Validation Error', 'Please fill in all required loan application fields (Loan Type, Amount, Duration).');
+            return;
+        }
+
+        const amount = parseFloat(loanAmount.value);
+        const duration = parseInt(loanDurationMonths.value);
+
+        if (amount < 1000 || isNaN(amount)) {
+            showMessage('Validation Error', 'Loan amount must be at least ₹1,000.');
+            return;
+        }
+        if (duration < 12 || duration > 360 || isNaN(duration)) {
+            showMessage('Validation Error', 'Loan duration must be between 12 and 360 months.');
+            return;
+        }
+
+        const selectedLoanType = loanType.value;
+        const interestRate = LOAN_INTEREST_RATES[selectedLoanType];
+
+        if (interestRate === undefined) {
+            showMessage('Error', 'Invalid loan type selected. Please choose from the available options.');
+            return;
+        }
+
+        const body = {
+            type: selectedLoanType,
+            amount: amount,
+            durationMonths: duration,
+            interestRate: interestRate,
+            description: loanDescription.value
+        };
+
+        try {
+            const res = await fetch(`${BASE_URL}/loans`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                showMessage('Success', `Loan application for ${selectedLoanType} submitted successfully! Interest Rate: ${interestRate}%`);
+                loanForm.reset();
+                loadLoans();
+            } else {
+                const errorData = await res.json();
+                showMessage('Error', errorData.message || 'Failed to apply for loan. Please try again.');
+            }
+        } catch (err) {
+            console.error('Error applying for loan:', err);
+            showMessage('Error', 'An unexpected error occurred while applying for the loan.');
+        }
+    });
+
+    // Handle Pay EMI form submission
+    payEmiForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const loanId = currentLoanId.value;
+        const accountId = emiAccountSelect.value;
+        const amount = parseFloat(emiAmountInput.value);
+
+        // Basic client-side validation for EMI payment
+        if (!accountId || !amount || isNaN(amount) || amount <= 0) {
+            showMessage('Validation Error', 'Please select an account and enter a valid amount to pay.');
+            return;
+        }
+
+        const selectedAccountOption = emiAccountSelect.options[emiAccountSelect.selectedIndex];
+        if (!selectedAccountOption) {
+            showMessage('Error', 'Please select a valid account.');
+            return;
+        }
+        const accountBalance = parseFloat(selectedAccountOption.dataset.balance || 0);
+
+        if (amount > accountBalance) {
+            showMessage('Insufficient Funds', 'The payment amount exceeds your selected account balance. Please enter a smaller amount or choose another account.');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${BASE_URL}/loans/${loanId}/pay`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ accountId, amount })
+            });
+
+            if (res.ok) {
+                showMessage('Success', 'EMI payment successful!');
+                closePayEmiModal();
+                loadLoans();
+                loadAccountsForEmi();
+            } else {
+                const errorData = await res.json();
+                showMessage('Error', errorData.message || 'Failed to process EMI payment. Please try again.');
+            }
+        } catch (err) {
+            console.error('Error paying EMI:', err);
+            showMessage('Error', 'An unexpected error occurred while processing EMI payment.');
+        }
+    });
+
+    // --- Initial Load ---
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!token) {
+            showMessage('Authentication Required', 'You are not logged in. Please log in to access this page.', () => {
+                window.location.href = 'login.html';
+            });
+            return;
+        }
+        loadLoans();
+        loadAccountsForEmi();
+    });
+</script>
+</body>
+</html>
+

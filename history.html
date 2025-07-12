@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank - Transaction History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        /* Faster transitions for interactive elements */
+        .transition-all-fast { transition: all 0.15s ease-in-out; }
+
+        /* Custom styling for filter inputs/selects */
+        .filter-input {
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.5rem 0.75rem; /* px-3 py-2 */
+            font-size: 0.875rem; /* text-sm */
+            line-height: 1.25rem;
+            width: 100%; /* Full width on small screens */
+            max-width: 150px; /* Max width on larger screens */
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-input:focus {
+            outline: none;
+            border-color: #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); /* focus:ring-2 focus:ring-blue-500 */
+        }
+        /* Specific override for select width on small screens */
+        @media (max-width: 639px) {
+            .filter-input {
+                max-width: none; /* Allow select to take full width */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <!-- Header - Keeping as per user request -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    Transaction History
+                </h1>
+            </div>
+            <div class="order-3 flex space-x-3">
+                <a href="recentalerts.html">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                        </svg>
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto bg-gray-100 p-4 sm:p-6 md:p-8 main-content-area">
+
+            <!-- Filters, Sort & PDF Section -->
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4 flex-wrap">
+                <div class="flex items-center space-x-2 w-full sm:w-auto">
+                    <label for="filterType" class="text-sm font-medium text-gray-700 whitespace-nowrap">Type:</label>
+                    <select id="filterType" class="filter-input">
+                        <option value="All">All</option>
+                        <option value="Credit">Credit</option>
+                        <option value="Debit">Debit</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2 w-full sm:w-auto">
+                    <label for="filterAccount" class="text-sm font-medium text-gray-700 whitespace-nowrap">Account:</label>
+                    <select id="filterAccount" class="filter-input">
+                        <option value="All">All</option>
+                        <!-- Account options will be loaded here by JS -->
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2 w-full sm:w-auto">
+                    <label for="searchDesc" class="text-sm font-medium text-gray-700 whitespace-nowrap">Search:</label>
+                    <input id="searchDesc" type="text" placeholder="Description..." class="filter-input" />
+                </div>
+
+                <div class="flex flex-grow justify-end space-x-3 w-full sm:w-auto">
+                    <button id="sortDateBtn" class="px-4 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 shadow-sm font-medium">Sort Date</button>
+                    <button id="sortAmountBtn" class="px-4 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 shadow-sm font-medium">Sort Amount</button>
+                    <button id="downloadPdfBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 shadow-md font-medium">
+                        Download PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transaction History Table -->
+            <div id="historyContent" class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">From</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">To</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody" class="bg-white divide-y divide-gray-100">
+                            <tr><td colspan="8" class="text-center px-4 py-4 text-gray-500">Loading transactions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-4 text-center border-t border-gray-200">
+                    <button id="loadMoreBtn" class="px-5 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-colors duration-200 font-medium shadow-sm">Load More</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Message Box Modal (for consistency, though not strictly used in your provided JS) -->
+    <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm mx-auto transform scale-95 opacity-0 transition-all duration-300 ease-out"
+             id="messageBoxContent">
+            <h3 id="messageTitle" class="text-2xl font-bold mb-4 text-gray-900"></h3>
+            <p id="messageText" class="text-gray-700 text-base mb-6 leading-relaxed"></p>
+            <div class="flex justify-end">
+                <button onclick="closeMessage()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+const token = localStorage.getItem('token');
+const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api'; // Define BASE_URL
+
+const historyTableBody = document.getElementById('historyTableBody');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+const filterType = document.getElementById('filterType');
+const filterAccount = document.getElementById('filterAccount');
+const searchDesc = document.getElementById('searchDesc');
+const sortDateBtn = document.getElementById('sortDateBtn');
+const sortAmountBtn = document.getElementById('sortAmountBtn');
+const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+
+// Message Box Elements (for consistency, copied from previous iterations)
+const messageBox = document.getElementById('messageBox');
+const messageBoxContent = document.getElementById('messageBoxContent');
+const messageTitle = document.getElementById('messageTitle');
+const messageText = document.getElementById('messageText');
+
+let transactions = []; // Stores all fetched transactions
+let filtered = [];    // Stores currently filtered transactions
+let displayedCount = 0;
+const batchSize = 15; // Increased batch size for more transactions per load
+let dateAsc = false;  // Sort order for date
+let amountAsc = false; // Sort order for amount
+
+// --- Message Box Functions (for consistent error/success messages) ---
+function showMessage(title, text, callback = null) {
+    messageTitle.textContent = title;
+    messageText.textContent = text;
+    messageBox.classList.remove('hidden');
+    setTimeout(() => {
+        messageBoxContent.classList.remove('opacity-0', 'scale-95');
+        messageBoxContent.classList.add('opacity-100', 'scale-100');
+    }, 10);
+
+    const okButton = messageBox.querySelector('button');
+    okButton.onclick = () => {
+        closeMessage();
+        if (callback) callback();
+    };
+}
+
+function closeMessage() {
+    messageBoxContent.classList.remove('opacity-100', 'scale-100');
+    messageBoxContent.classList.add('opacity-0', 'scale-95');
+    setTimeout(() => {
+        messageBox.classList.add('hidden');
+        messageBox.querySelector('button').onclick = null; // Clear listener
+    }, 300);
+}
+
+
+function renderTable(data) {
+    const toDisplay = data.slice(0, displayedCount);
+    historyTableBody.innerHTML = ''; // Clear existing rows
+
+    if (!toDisplay.length) {
+        historyTableBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">No transactions found matching your criteria.</td></tr>`;
+        loadMoreBtn.style.display = 'none';
+        return;
+    }
+
+    toDisplay.forEach(tx => {
+        const isCredit = tx.type === 'Credit';
+        const amountClass = isCredit ? 'text-green-600' : 'text-red-600';
+        const amountSign = isCredit ? '+' : '-';
+        const formattedAmount = parseFloat(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formattedBalance = tx.runningBalance !== undefined && tx.runningBalance !== null
+            ? parseFloat(tx.runningBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : '-';
+
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition-colors duration-100'; // Add hover effect
+        row.innerHTML = `
+            <td class="px-6 py-4 text-sm text-gray-900">${new Date(tx.createdAt).toLocaleDateString('en-IN')}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${tx.description || '-'}</td>
+            <td class="px-6 py-4 text-sm text-gray-700">${tx.accountType || '-'}</td>
+            <td class="px-6 py-4 text-sm font-medium ${amountClass}">${tx.type}</td>
+            <td class="px-6 py-4 text-sm font-semibold ${amountClass}">${amountSign}₹${formattedAmount}</td>
+            <td class="px-6 py-4 text-sm text-gray-700">${tx.fromAccountNumber || '-'}</td>
+            <td class="px-6 py-4 text-sm text-gray-700">${tx.toAccountNumber || '-'}</td>
+            <td class="px-6 py-4 text-sm text-gray-900 font-medium">₹${formattedBalance}</td>
+        `;
+        historyTableBody.appendChild(row);
+    });
+
+    // Show/hide load more button based on whether there are more items to display
+    loadMoreBtn.style.display = displayedCount < data.length ? 'inline-block' : 'none';
+}
+
+function applyFiltersAndSort() {
+    const typeVal = filterType.value;
+    const accountVal = filterAccount.value;
+    const searchVal = searchDesc.value.toLowerCase();
+
+    filtered = transactions.filter(tx => {
+        const matchType = (typeVal === 'All') || (tx.type === typeVal);
+        const matchAccount = (accountVal === 'All') || (tx.accountType === accountVal);
+        const matchSearch = (tx.description && tx.description.toLowerCase().includes(searchVal)) ||
+                            (tx.accountType && tx.accountType.toLowerCase().includes(searchVal)) ||
+                            (tx.fromAccountNumber && tx.fromAccountNumber.toLowerCase().includes(searchVal)) ||
+                            (tx.toAccountNumber && tx.toAccountNumber.toLowerCase().includes(searchVal));
+        return matchType && matchAccount && matchSearch;
+    });
+
+    // Reapply sorting after filtering
+    if (sortDateBtn.classList.contains('active-sort')) { // Check if date sort was active
+        filtered.sort((a, b) => dateAsc ? new Date(a.createdAt) - new Date(b.createdAt) : new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (sortAmountBtn.classList.contains('active-sort')) { // Check if amount sort was active
+        filtered.sort((a, b) => amountAsc ? a.amount - b.amount : b.amount - a.amount);
+    } else {
+         // Default sort (newest first) if no sort button is active
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    displayedCount = batchSize; // Reset displayed count when filters change
+    renderTable(filtered);
+}
+
+// Event Listeners for Filters
+filterType.addEventListener('change', applyFiltersAndSort);
+filterAccount.addEventListener('change', applyFiltersAndSort);
+searchDesc.addEventListener('input', applyFiltersAndSort);
+
+// Event Listeners for Sorting
+sortDateBtn.addEventListener('click', () => {
+    dateAsc = !dateAsc;
+    sortAmountBtn.classList.remove('active-sort'); // Deactivate other sort
+    sortDateBtn.classList.add('active-sort'); // Activate this sort
+    applyFiltersAndSort(); // Reapply filters and sorting
+});
+
+sortAmountBtn.addEventListener('click', () => {
+    amountAsc = !amountAsc;
+    sortDateBtn.classList.remove('active-sort'); // Deactivate other sort
+    sortAmountBtn.classList.add('active-sort'); // Activate this sort
+    applyFiltersAndSort(); // Reapply filters and sorting
+});
+
+loadMoreBtn.addEventListener('click', () => {
+    displayedCount += batchSize;
+    renderTable(filtered);
+});
+
+// PDF Download
+downloadPdfBtn.addEventListener('click', () => {
+    // Hide Load More button before PDF generation
+    const originalLoadMoreDisplay = loadMoreBtn.style.display;
+    loadMoreBtn.style.display = 'none';
+
+    // Temporarily show all filtered transactions for PDF export
+    const originalDisplayedCount = displayedCount;
+    displayedCount = filtered.length;
+    renderTable(filtered); // Render all filtered transactions
+
+    const element = document.getElementById('historyContent');
+    html2pdf(element, {
+        margin: 10,
+        filename: 'transaction_history.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    }).then(() => {
+        // Restore original displayed count and load more button display
+        displayedCount = originalDisplayedCount;
+        renderTable(filtered); // Re-render with original displayed count
+        loadMoreBtn.style.display = originalLoadMoreDisplay;
+    }).catch(error => {
+        console.error('Error generating PDF:', error);
+        showMessage('PDF Error', 'Failed to generate PDF. Please try again.');
+        // Ensure to restore state even on error
+        displayedCount = originalDisplayedCount;
+        renderTable(filtered);
+        loadMoreBtn.style.display = originalLoadMoreDisplay;
+    });
+});
+
+
+// Initial load
+window.addEventListener('DOMContentLoaded', async () => {
+    if (!token) {
+        // Use showMessage for authentication error
+        showMessage('Authentication Required', 'You are not logged in. Please log in to access this page.', () => {
+            window.location.href = 'login.html';
+        });
+        return;
+    }
+
+    try {
+        const res = await fetch(`${BASE_URL}/history`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            // Use showMessage for API errors
+            showMessage('Error', errorData.message || 'Failed to fetch transactions.');
+            historyTableBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-red-500">Failed to load transactions.</td></tr>`;
+            return;
+        }
+
+        transactions = await res.json();
+        // Default sort (newest first)
+        transactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        filtered = [...transactions]; // Initialize filtered with all transactions
+
+        // Populate Account Type filter
+        const accountTypes = Array.from(new Set(transactions.map(t => t.accountType).filter(Boolean)));
+        accountTypes.forEach(acc => {
+            const opt = document.createElement('option');
+            opt.value = acc;
+            opt.textContent = acc;
+            filterAccount.appendChild(opt);
+        });
+
+        displayedCount = batchSize; // Set initial displayed count
+        renderTable(filtered); // Initial render
+    } catch (err) {
+        console.error('Error during initial fetch:', err);
+        // Use showMessage for unexpected errors
+        showMessage('Network Error', 'Could not load transactions. Please check your network connection.');
+        historyTableBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-red-500">Failed to load transactions. Please try again later.</td></tr>`;
+    }
+});
+</script>
+
+</body>
+</html>

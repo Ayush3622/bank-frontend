@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank - Funds Transfer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        /* Custom styling for form inputs to ensure consistent appearance and responsiveness */
+        .form-input {
+            width: 100%;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #60a5fa; /* ring-blue-400 */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+        }
+
+        /* Styling for modal content animation */
+        .modal-content-animation {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+        .modal-content-animation.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+<div class="flex-1 flex flex-col w-full overflow-hidden">
+    <!-- Header - Keeping as per user request -->
+    <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+        <div class="order-1 sm:order-none">
+            <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                </svg>
+                <span class="hidden sm:inline">Dashboard</span>
+                <span class="inline sm:hidden">Back</span>
+            </a>
+        </div>
+        <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                Transfer Funds
+            </h1>
+        </div>
+        <div class="order-3">
+            <a href="recentalerts.html">
+                <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                    </svg>
+                </button>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 bg-gray-100 p-4 sm:p-6 md:p-8 main-content-area">
+        <div class="max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-blue-100">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Make a New Transfer</h2>
+            <form id="transferForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Transfer Type</label>
+                    <div class="flex flex-wrap gap-x-6 gap-y-3">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="transferType" value="own" checked class="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <span class="ml-2 text-gray-700">Between My Accounts</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="transferType" value="sameBank" class="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <span class="ml-2 text-gray-700">To Same Bank (Other User)</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="transferType" value="external" class="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <span class="ml-2 text-gray-700">To External Bank</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="fromAccount" class="block text-sm font-medium text-gray-700 mb-1">From Account</label>
+                    <select id="fromAccount" required class="form-input">
+                        <option value="">Select an account</option>
+                    </select>
+                </div>
+
+                <div id="toAccountSection">
+                    <!-- Dynamic To Account fields will be rendered here by JS -->
+                </div>
+
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                    <input type="number" id="amount" min="0.01" step="0.01" required class="form-input" placeholder="e.g., 100.00">
+                </div>
+
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <input type="text" id="description" class="form-input" placeholder="Optional note for the transfer">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-xl transition-all duration-200 font-semibold focus:outline-none focus:ring-4 focus:ring-blue-300">Proceed with Transfer</button>
+            </form>
+        </div>
+    </main>
+</div>
+
+<!-- Message Box Modal (for consistent error/success messages) -->
+<div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm mx-auto modal-content-animation"
+         id="messageBoxContent">
+        <h3 id="messageTitle" class="text-2xl font-bold mb-4 text-gray-900"></h3>
+        <p id="messageText" class="text-gray-700 text-base mb-6 leading-relaxed"></p>
+        <div class="flex justify-end">
+            <button onclick="closeMessage()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+const token = localStorage.getItem('token');
+const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api'; // Define BASE_URL
+
+const fromAccountSelect = document.getElementById('fromAccount');
+const toAccountSection = document.getElementById('toAccountSection');
+const transferForm = document.getElementById('transferForm');
+
+// Message Box Elements (for consistent error/success messages)
+const messageBox = document.getElementById('messageBox');
+const messageBoxContent = document.getElementById('messageBoxContent');
+const messageTitle = document.getElementById('messageTitle');
+const messageText = document.getElementById('messageText');
+
+let accounts = []; // Stores user's accounts
+
+// --- Message Box Functions (for consistent error/success messages) ---
+function showMessage(title, text, callback = null) {
+    messageTitle.textContent = title;
+    messageText.textContent = text;
+    messageBox.classList.remove('hidden');
+    // Add 'show' class after a slight delay to trigger transition
+    setTimeout(() => {
+        messageBoxContent.classList.add('show');
+    }, 10);
+
+    const okButton = messageBox.querySelector('button');
+    okButton.onclick = () => {
+        closeMessage();
+        if (callback) callback();
+    };
+}
+
+function closeMessage() {
+    messageBoxContent.classList.remove('show');
+    // Hide the modal after the transition completes
+    setTimeout(() => {
+        messageBox.classList.add('hidden');
+        // Reset the onclick listener to prevent multiple triggers
+        messageBox.querySelector('button').onclick = null;
+    }, 300); // Duration of the transition
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+    if (!token) {
+        showMessage('Authentication Required', 'You are not logged in. Please log in to access this page.', () => {
+            window.location.href = 'login.html';
+        });
+        return;
+    }
+
+    try {
+        const res = await fetch(`${BASE_URL}/accounts/summary`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            showMessage('Error', errorData.message || 'Failed to load accounts.');
+            return;
+        }
+
+        accounts = await res.json();
+        
+
+        // Populate "From Account" dropdown
+        fromAccountSelect.innerHTML = accounts.map(acct =>
+            `<option value="${acct._id}">${acct.type} (****${acct.accountNumber.slice(-4)}) - ₹${acct.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>`
+        ).join('');
+        if (accounts.length === 0) {
+            fromAccountSelect.innerHTML = '<option value="">No accounts available</option>';
+            fromAccountSelect.disabled = true;
+            showMessage('Info', 'No accounts available for transfers. Please add an account first.');
+        } else {
+            fromAccountSelect.disabled = false;
+        }
+
+        // Render initial "To Account" field (default to "Between My Accounts")
+        renderToAccountField('internal');
+
+    } catch (err) {
+        console.error('Error fetching accounts:', err);
+        showMessage('Network Error', 'Could not load accounts. Please check your network connection.');
+    }
+
+    document.querySelectorAll('input[name="transferType"]').forEach(radio => {
+        radio.addEventListener('change', e => {
+            const map = { own: 'internal', sameBank: 'sameBank', external: 'external' };
+            renderToAccountField(map[e.target.value] || 'internal');
+        });
+    });
+});
+
+function renderToAccountField(type) {
+    let html = '';
+    if (type === 'internal') {
+        const options = accounts.map(a => `<option value="${a._id}">${a.type} (****${a.accountNumber.slice(-4)}) - ₹${a.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>`).join('');
+        html = `
+            <div>
+                <label for="toAccountOwn" class="block text-sm font-medium text-gray-700 mb-1">To Account</label>
+                <select id="toAccountOwn" required class="form-input">
+                    <option value="">Select an account</option>${options}
+                </select>
+            </div>
+        `;
+    } else if (type === 'sameBank') {
+        html = `
+            <div>
+                <label for="recipientAccountNumber" class="block text-sm font-medium text-gray-700 mb-1">Recipient Account Number (Same Bank)</label>
+                <input type="text" id="recipientAccountNumber" required class="form-input" placeholder="e.g., 1234567890">
+            </div>
+            <div>
+                <label for="recipientName" class="block text-sm font-medium text-gray-700 mb-1">Recipient Name</label>
+                <input type="text" id="recipientName" class="form-input" placeholder="Optional: Name of recipient">
+            </div>
+        `;
+    } else { // external
+       html = `
+    <div>
+        <label for="transferType" class="block text-sm font-medium text-gray-700 mb-1">Transfer Type</label>
+        <select id="transferType" class="form-select">
+            <option value="imps">IMPS</option>
+            <option value="neft">NEFT</option>
+            <option value="rtgs">RTGS</option>
+        </select>
+    </div>
+    <div>
+        <label for="recipientAccountNumber" class="block text-sm font-medium text-gray-700 mb-1">Recipient Account Number (External Bank)</label>
+        <input type="text" id="recipientAccountNumber" required class="form-input" placeholder="e.g., 9876543210">
+    </div>
+    <div>
+        <label for="recipientIfsc" class="block text-sm font-medium text-gray-700 mb-1">Recipient Bank IFSC</label>
+        <input type="text" id="recipientIfsc" required class="form-input" placeholder="e.g., HDFC0001234">
+    </div>
+    <div>
+        <label for="recipientName" class="block text-sm font-medium text-gray-700 mb-1">Recipient Name</label>
+        <input type="text" id="recipientName" class="form-input" placeholder="Optional: Name of recipient">
+    </div>
+`;
+
+    }
+    toAccountSection.innerHTML = html;
+}
+
+transferForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const selectedTransferType = document.querySelector('input[name="transferType"]:checked').value;
+    const transferTypeMap = { own: 'internal', sameBank: 'sameBank', external: 'external' };
+    const transferType = transferTypeMap[selectedTransferType];
+
+    const fromAccountId = fromAccountSelect.value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const description = document.getElementById('description').value.trim();
+
+    // Client-side validation
+    if (!fromAccountId || fromAccountId === "") {
+        showMessage('Validation Error', 'Please select a "From Account".');
+        return;
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+        showMessage('Validation Error', 'Please enter a valid amount greater than zero.');
+        return;
+    }
+
+    const selectedFromAccount = accounts.find(acc => acc._id === fromAccountId);
+    if (selectedFromAccount && selectedFromAccount.balance < amount) {
+        showMessage('Insufficient Funds', 'The amount exceeds your "From Account" balance.');
+        return;
+    }
+
+    const payload = { transferType, fromAccountId, amount, description };
+
+    // Dynamic recipient fields based on transfer type
+    if (transferType === 'internal') {
+        const toAccountOwnId = document.getElementById('toAccountOwn').value;
+        if (!toAccountOwnId || toAccountOwnId === "") {
+            showMessage('Validation Error', 'Please select a "To Account".');
+            return;
+        }
+        if (fromAccountId === toAccountOwnId) {
+            showMessage('Validation Error', 'Source and destination accounts cannot be the same for internal transfer.');
+            return;
+        }
+        payload.toAccountId = toAccountOwnId;
+    } else if (transferType === 'sameBank') {
+        const recipientAccountNumber = document.getElementById('recipientAccountNumber').value.trim();
+        if (!recipientAccountNumber) {
+            showMessage('Validation Error', 'Please enter the Recipient Account Number.');
+            return;
+        }
+        payload.recipientAccountNumber = recipientAccountNumber;
+        payload.recipientName = document.getElementById('recipientName').value.trim();
+    } else if (transferType === 'external') {
+        const recipientAccountNumber = document.getElementById('recipientAccountNumber').value.trim();
+        const recipientIfsc = document.getElementById('recipientIfsc').value.trim();
+        if (!recipientAccountNumber || !recipientIfsc) {
+            showMessage('Validation Error', 'Please enter Recipient Account Number and Bank IFSC.');
+            return;
+        }
+        payload.recipientAccountNumber = recipientAccountNumber;
+        payload.ifsc = recipientIfsc;
+        payload.recipientName = document.getElementById('recipientName').value.trim();
+    }
+
+    try {
+        const res = await fetch(`${BASE_URL}/transfer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            showMessage('Transfer Successful!', 'Funds have been transferred successfully.');
+            transferForm.reset();
+            document.querySelector('input[value="own"]').checked = true; // Reset radio to default
+            renderToAccountField('internal'); // Re-render 'To Account' for internal
+            // Re-fetch accounts to update balances in the From/To dropdowns
+            const updatedAccountsRes = await fetch(`${BASE_URL}/accounts/summary`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (updatedAccountsRes.ok) {
+                accounts = await updatedAccountsRes.json();
+                fromAccountSelect.innerHTML = accounts.map(acct =>
+                    `<option value="${acct._id}">${acct.type} (****${acct.accountNumber.slice(-4)}) - ₹${acct.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>`
+                ).join('');
+                if (accounts.length === 0) {
+                    fromAccountSelect.innerHTML = '<option value="">No accounts available</option>';
+                    fromAccountSelect.disabled = true;
+                } else {
+                    fromAccountSelect.disabled = false;
+                }
+            } else {
+                console.error('Failed to reload accounts after transfer.');
+            }
+
+        } else {
+            const errorData = await res.json();
+            showMessage('Transfer Failed', errorData.message || 'An error occurred during transfer.');
+        }
+    } catch (err) {
+        console.error('Network error during transfer:', err);
+        showMessage('Network Error', 'Could not complete transfer. Please check your network connection.');
+    }
+});
+
+</script>
+
+</body>
+</html>
+

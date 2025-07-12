@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Activity Logs - MyBank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance (if content overflows) */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        /* Custom styling for filter select */
+        .filter-select {
+            width: 100%;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+            background-color: #ffffff; /* Ensure white background */
+            appearance: none; /* Remove default arrow */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236B7280'%3e%3cpath d='M7 7l3-3 3 3m0 6l-3 3-3-3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em 1.5em;
+        }
+        .filter-select:focus {
+            outline: none;
+            border-color: #60a5fa; /* ring-blue-400 */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <!-- Header - Standardized for MyBank pages -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    Recent Alerts
+                </h1>
+            </div>
+            <div class="order-3">
+            </div>
+        </header>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-8 max-w-4xl mx-auto w-full space-y-8 main-content-area">
+
+            <!-- Filter Section -->
+            <section class="bg-white p-6 rounded-xl shadow-lg border border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <h2 class="text-xl font-bold text-gray-900 w-full sm:w-auto text-center sm:text-left">Filter Alerts by Category</h2>
+                <div class="w-full sm:w-auto">
+                    <label for="categoryFilter" class="sr-only">Select Category</label>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option value="login">Login</option>
+                        <option value="registration">Registration</option>
+                        <option value="profile">Profile</option>
+                        <option value="settings">Settings</option>
+                        <option value="kyc">KYC</option>
+                        <option value="account">Account</option>
+                        <option value="transfer">Transfer</option>
+                        <option value="deposit">Deposit</option>
+                        <option value="withdrawal">Withdrawal</option>
+                        <option value="bill_payment">Bill Payment</option>
+                        <option value="card">Card</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="loan">Loan</option>
+                        <option value="insurance">Insurance</option>
+                        <option value="investment">Investment</option>
+                        <option value="support">Support</option>
+                        <option value="security">Security</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Activity Logs Container -->
+            <section id="logsContainer" class="space-y-4">
+                <!-- Logs will be loaded here by JavaScript -->
+                <p class="text-gray-500 text-center py-8">Loading activity logs...</p>
+            </section>
+
+            <div class="text-center mt-6">
+                <button id="loadMoreBtn" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300 hidden">Load More</button>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+        const token = localStorage.getItem('token');
+        const logsContainer = document.getElementById('logsContainer');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const loadMoreBtn = document.getElementById('loadMoreBtn'); // Get the new button
+
+        let allLogs = []; // Stores all fetched logs
+        let filteredLogs = []; // Stores logs after filtering
+        let displayedCount = 0;
+        const batchSize = 10; // Number of logs to display initially and per "Load More" click
+
+        if (!token) {
+            logsContainer.innerHTML = `<p class="bg-red-100 text-red-700 p-4 rounded-lg text-center font-medium">You must be logged in to view activity logs.</p>`;
+            loadMoreBtn.classList.add('hidden'); // Hide button if not logged in
+        } else {
+            function renderLogs() {
+                logsContainer.innerHTML = ''; // Clear existing logs
+
+                const logsToRender = filteredLogs.slice(0, displayedCount);
+
+                if (logsToRender.length === 0) {
+                    logsContainer.innerHTML = `<p class="text-gray-500 text-center py-8">No activity logs found for this category.</p>`;
+                    loadMoreBtn.classList.add('hidden');
+                    return;
+                }
+
+                logsToRender.forEach(log => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-xl shadow-md p-5 border border-gray-200 transition-all duration-200 hover:shadow-lg'; // Enhanced card styling
+
+                    const timestamp = new Date(log.timestamp).toLocaleString('en-IN', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                    });
+
+                    // Function to get a consistent color for each category
+                    const getCategoryColor = (category) => {
+                        const colors = {
+                            'login': 'bg-green-100 text-green-800',
+                            'registration': 'bg-purple-100 text-purple-800',
+                            'profile': 'bg-indigo-100 text-indigo-800',
+                            'settings': 'bg-yellow-100 text-yellow-800',
+                            'kyc': 'bg-orange-100 text-orange-800',
+                            'account': 'bg-blue-100 text-blue-800',
+                            'transfer': 'bg-teal-100 text-teal-800',
+                            'deposit': 'bg-lime-100 text-lime-800',
+                            'withdrawal': 'bg-red-100 text-red-800',
+                            'bill_payment': 'bg-pink-100 text-pink-800',
+                            'card': 'bg-fuchsia-100 text-fuchsia-800',
+                            'cheque': 'bg-cyan-100 text-cyan-800',
+                            'loan': 'bg-emerald-100 text-emerald-800',
+                            'insurance': 'bg-violet-100 text-violet-800',
+                            'investment': 'bg-rose-100 text-rose-800',
+                            'support': 'bg-amber-100 text-amber-800',
+                            'security': 'bg-gray-200 text-gray-800',
+                            'other': 'bg-neutral-100 text-neutral-800'
+                        };
+                        return colors[category] || 'bg-gray-100 text-gray-700'; // Default color
+                    };
+
+                    card.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3">
+                            <span class="text-sm text-gray-500 font-medium">${timestamp}</span>
+                            <span class="text-xs px-2.5 py-1 rounded-full font-semibold mt-2 sm:mt-0 ${getCategoryColor(log.category)} capitalize">
+                                ${log.category.replace(/_/g, ' ')}
+                            </span>
+                        </div>
+                        <p class="text-gray-800 font-semibold text-base leading-relaxed">${log.action}</p>
+                    `;
+
+                    logsContainer.appendChild(card);
+                });
+
+                // Show/hide load more button
+                if (displayedCount < filteredLogs.length) {
+                    loadMoreBtn.classList.remove('hidden');
+                } else {
+                    loadMoreBtn.classList.add('hidden');
+                }
+            }
+
+            function applyFilters() {
+                const selectedCategory = categoryFilter.value;
+                filteredLogs = selectedCategory
+                    ? allLogs.filter(log => log.category === selectedCategory)
+                    : [...allLogs]; // Create a copy to avoid modifying original
+
+                displayedCount = batchSize; // Reset displayed count on filter change
+                renderLogs();
+            }
+
+            async function fetchAllLogs() {
+                logsContainer.innerHTML = `<p class="text-gray-500 text-center py-8">Loading activity logs...</p>`;
+                loadMoreBtn.classList.add('hidden'); // Hide button while loading
+
+                try {
+                    const res = await fetch(`${BASE_URL}/activity-logs`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    if (!res.ok) {
+                        throw new Error('Failed to fetch logs');
+                    }
+                    allLogs = await res.json();
+                    // Sort logs by timestamp in descending order (newest first)
+                    allLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    applyFilters(); // Apply filters and render initial batch
+                } catch (err) {
+                    console.error('Error loading activity logs:', err);
+                    logsContainer.innerHTML = `<p class="bg-red-100 text-red-700 p-4 rounded-lg text-center font-medium">Error loading activity logs. Please try again.</p>`;
+                    loadMoreBtn.classList.add('hidden');
+                }
+            }
+
+            // Event Listeners
+            categoryFilter.addEventListener('change', applyFilters);
+            loadMoreBtn.addEventListener('click', () => {
+                displayedCount += batchSize;
+                renderLogs();
+            });
+
+            // Initial fetch on page load
+            fetchAllLogs();
+        }
+    </script>
+
+</body>
+</html>
+

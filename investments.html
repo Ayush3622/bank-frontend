@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyBank - Investment Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom styles for the metric cards to ensure consistent appearance */
+    .metric-card {
+      background-color: white;
+      border-radius: 0.5rem; /* rounded-lg */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+      padding: 1.5rem; /* p-6 */
+      text-align: center; /* Center text within cards */
+    }
+
+    /* Ensure form inputs take full width on small screens and adjust on larger screens */
+    .form-input {
+      width: 100%;
+      border: 1px solid #d1d5db; /* border-gray-300 */
+      border-radius: 0.25rem; /* rounded */
+      padding: 0.5rem 0.75rem; /* px-3 py-2 */
+    }
+
+    /* Ensure tables are scrollable on small screens if content overflows */
+    .overflow-x-auto table {
+      width: 100%; /* Ensure table takes full width of its container */
+      border-collapse: collapse; /* For clean table borders */
+    }
+    .overflow-x-auto th, .overflow-x-auto td {
+      white-space: nowrap; /* Prevent content from wrapping in table cells */
+      padding: 0.75rem 1rem; /* Adjust padding for better spacing */
+      border-bottom: 1px solid #e5e7eb; /* Add subtle border for rows */
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+  <div class="flex-1 flex flex-col w-full overflow-hidden">
+    <!-- Header - Keeping as per user request -->
+    <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+      <div class="order-1 sm:order-none">
+        <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200">
+          <svg class="w-6 h-6 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+          </svg>
+          <div class="hidden sm:flex items-center font-medium">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+            </svg>
+            Dashboard
+          </div>
+        </a>
+      </div>
+      <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+          Investment Management
+        </h1>
+      </div>
+      <div class="order-3">
+        <a href="recentalerts.html">
+          <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+            </svg>
+          </button>
+        </a>
+      </div>
+    </header>
+
+    <main class="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full">
+      <h2 class="text-2xl font-bold mb-4 text-gray-800">Your Investment Portfolio</h2>
+
+      <!-- Metrics Section - Responsive Grid -->
+      <div id="metrics" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <!-- Metric cards will be rendered here by JavaScript -->
+      </div>
+
+      <!-- Holdings Table -->
+      <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <h3 class="text-xl font-semibold mb-3 text-gray-800">Your Holdings</h3>
+        <div class="overflow-x-auto rounded-md border border-gray-200">
+          <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-50">
+              <tr class="text-gray-600 uppercase tracking-wider">
+                <th class="px-4 py-3 font-medium">Asset</th>
+                <th class="px-4 py-3 font-medium">Type</th>
+                <th class="px-4 py-3 text-right font-medium">Quantity</th>
+                <th class="px-4 py-3 text-right font-medium">Avg. Cost</th>
+                <th class="px-4 py-3 text-right font-medium">Current Price</th>
+                <th class="px-4 py-3 text-right font-medium">Total Value</th>
+                <th class="px-4 py-3 text-right font-medium">Gain/Loss</th>
+              </tr>
+            </thead>
+            <tbody id="holdingsBody" class="divide-y divide-gray-100"></tbody>
+          </table>
+        </div>
+        <div class="flex justify-center sm:justify-end mt-4">
+          <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-md text-sm font-medium transition-colors duration-200">View Detailed Portfolio</a>
+        </div>
+      </div>
+
+      <!-- Buy/Sell Buttons -->
+      <div class="flex flex-col sm:flex-row justify-center sm:justify-end gap-3 mb-6">
+        <button onclick="toggleBuy()" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 shadow-md font-medium">Buy Investment</button>
+        <button onclick="toggleSell()" class="w-full sm:w-auto px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 shadow-md font-medium">Sell Investment</button>
+      </div>
+
+      <!-- Add Investment Form -->
+      <div id="buyInvestmentSection" class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Add New Investment</h3>
+        <form id="investmentForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label for="productId" class="block text-sm font-medium text-gray-700 mb-1">Select Investment</label>
+            <select id="productId" name="productId" class="form-input" required></select>
+          </div>
+          <div>
+            <label for="units" class="block text-sm font-medium text-gray-700 mb-1">Units</label>
+            <input type="number" id="units" name="units" min="1" class="form-input" required />
+          </div>
+          <div>
+            <label for="accountId" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+            <select id="accountId" name="accountId" class="form-input" required></select>
+          </div>
+          <div class="col-span-1 sm:col-span-3 flex justify-center sm:justify-end mt-2">
+            <button type="submit" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-colors duration-200 shadow-md font-medium">Buy</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sell Investment Form -->
+      <div id="sellInvestmentSection" class="bg-white rounded-lg shadow-md p-6 hidden">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Sell Investment</h3>
+        <form id="sellForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label for="sellProductId" class="block text-sm font-medium text-gray-700 mb-1">Select Investment</label>
+            <select id="sellProductId" name="productId" class="form-input" required></select>
+          </div>
+          <div>
+            <label for="sellUnits" class="block text-sm font-medium text-gray-700 mb-1">Units</label>
+            <input type="number" id="sellUnits" name="units" min="1" class="form-input" required />
+          </div>
+          <div>
+            <label for="sellAccountId" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+            <select id="sellAccountId" name="accountId" class="form-input" required></select>
+          </div>
+          <div class="col-span-1 sm:col-span-3 flex justify-center sm:justify-end mt-2">
+            <button type="submit" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition-colors duration-200 shadow-md font-medium">Sell</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Message Box Modal -->
+  <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 ease-out">
+      <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm mx-auto transform scale-95 opacity-0 transition-all duration-300 ease-out"
+           id="messageBoxContent">
+          <h3 id="messageTitle" class="text-2xl font-bold mb-4 text-gray-900"></h3>
+          <p id="messageText" class="text-gray-700 text-base mb-6 leading-relaxed"></p>
+          <div class="flex justify-end">
+              <button onclick="closeMessage()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+                  OK
+              </button>
+          </div>
+      </div>
+  </div>
+
+
+  <script>
+    const token = localStorage.getItem('token');
+    const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api'; // Define BASE_URL for API calls
+
+    // Element references for Message Box Modal
+    const messageBox = document.getElementById('messageBox');
+    const messageBoxContent = document.getElementById('messageBoxContent');
+    const messageTitle = document.getElementById('messageTitle');
+    const messageText = document.getElementById('messageText');
+
+    // --- General Message Box Functions ---
+    function showMessage(title, text, callback = null) {
+        messageTitle.textContent = title;
+        messageText.textContent = text;
+        messageBox.classList.remove('hidden');
+        // Trigger transition for content
+        setTimeout(() => {
+            messageBoxContent.classList.remove('opacity-0', 'scale-95');
+            messageBoxContent.classList.add('opacity-100', 'scale-100');
+        }, 10); // Small delay to allow 'hidden' to be removed first
+
+        const okButton = messageBox.querySelector('button');
+        okButton.onclick = () => {
+            closeMessage();
+            if (callback) callback();
+        };
+    }
+
+    function closeMessage() {
+        messageBoxContent.classList.remove('opacity-100', 'scale-100');
+        messageBoxContent.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+            messageBox.classList.add('hidden');
+            // Reset OK button's onclick to default for safety
+            messageBox.querySelector('button').onclick = () => messageBox.classList.add('hidden');
+        }, 300); // Wait for transition to complete before hiding
+    }
+
+
+    async function fetchPortfolio() {
+      try {
+        const res = await fetch(`${BASE_URL}/investments/portfolio`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) {
+            const errorData = await res.json();
+            showMessage('Error', errorData.message || 'Failed to fetch portfolio.');
+            return;
+        }
+        const data = await res.json();
+        renderHoldings(data);
+        renderMetrics(data);
+      } catch (err) {
+        console.error('Error fetching portfolio:', err);
+        showMessage('Error', 'Failed to load portfolio. Please check your network connection.');
+      }
+    }
+
+    function renderHoldings(data) {
+      const tbody = document.getElementById('holdingsBody');
+      tbody.innerHTML = '';
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">You have no investments yet. Start by adding a new one!</td></tr>`;
+        return;
+      }
+
+      data.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50'; // Add hover effect to rows
+        tr.innerHTML = `
+          <td class="px-4 py-3">${item.asset}</td>
+          <td class="px-4 py-3">${item.type}</td>
+          <td class="px-4 py-3 text-right">${item.quantity}</td>
+          <td class="px-4 py-3 text-right">₹${parseFloat(item.avgCost).toFixed(2)}</td>
+          <td class="px-4 py-3 text-right">₹${parseFloat(item.currentPrice).toFixed(2)}</td>
+          <td class="px-4 py-3 text-right">₹${parseFloat(item.totalValue).toFixed(2)}</td>
+          <td class="px-4 py-3 text-right ${parseFloat(item.gainLoss) >= 0 ? 'text-green-600' : 'text-red-600'}">
+            ${parseFloat(item.gainLoss) >= 0 ? '+' : ''}₹${parseFloat(item.gainLoss).toFixed(2)} (${parseFloat(item.gainLossPercent).toFixed(2)}%)
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderMetrics(data) {
+      let total = 0, gain = 0;
+      data.forEach(d => {
+        total += parseFloat(d.totalValue);
+        gain += parseFloat(d.gainLoss);
+      });
+      // Simulate today's gain/loss
+      const todayGain = total > 0 ? (Math.random() * 1000 - 500) : 0;
+      const todayPercent = total > 0 ? ((todayGain / total) * 100) : 0;
+
+      document.getElementById('metrics').innerHTML = `
+        <div class="metric-card">
+          <p class="text-gray-600 text-sm mb-1">Total Portfolio Value</p>
+          <p class="text-2xl font-bold text-blue-600">₹${total.toFixed(2)}</p>
+        </div>
+        <div class="metric-card">
+          <p class="text-gray-600 text-sm mb-1">Today's Change</p>
+          <p class="text-2xl font-bold ${todayGain >= 0 ? 'text-green-600' : 'text-red-600'}">
+            ${todayGain >= 0 ? '+' : ''}₹${todayGain.toFixed(2)} <span class="text-sm font-normal text-gray-500">(${todayPercent.toFixed(2)}%)</span>
+          </p>
+        </div>
+        <div class="metric-card">
+          <p class="text-gray-600 text-sm mb-1">Overall Gain/Loss</p>
+          <p class="text-2xl font-bold ${gain >= 0 ? 'text-green-600' : 'text-red-600'}">
+            ${gain >= 0 ? '+' : ''}₹${gain.toFixed(2)} <span class="text-sm font-normal text-gray-500">(${total > 0 ? ((gain / (total - gain + 0.000001)) * 100).toFixed(2) : 0}%)</span>
+          </p>
+        </div>
+      `;
+    }
+
+    async function loadProductsAndAccounts() {
+      try {
+        const [productsRes, accountsRes, portfolioRes] = await Promise.all([
+          fetch(`${BASE_URL}/investments/products`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${BASE_URL}/accounts/summary`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${BASE_URL}/investments/portfolio`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+
+        if (!productsRes.ok || !accountsRes.ok || !portfolioRes.ok) {
+            const errorText = (await productsRes.json()).message || (await accountsRes.json()).message || (await portfolioRes.json()).message || 'Failed to load necessary data.';
+            showMessage('Error', errorText);
+            return;
+        }
+
+        const products = await productsRes.json();
+        const accounts = await accountsRes.json();
+        const portfolio = await portfolioRes.json();
+
+        const productSelect = document.getElementById('productId');
+        const sellProductSelect = document.getElementById('sellProductId');
+        const accountSelect = document.getElementById('accountId');
+        const sellAccountSelect = document.getElementById('sellAccountId');
+
+        // For buying (all products)
+        productSelect.innerHTML = products.map(p =>
+          `<option value="${p._id}">${p.name} (${p.type}) - ₹${p.basePrice.toFixed(2)}</option>`
+        ).join('');
+        if (products.length === 0) productSelect.innerHTML = '<option value="">No products available</option>';
+
+
+        // For selling (only owned holdings)
+        sellProductSelect.innerHTML = portfolio.map(p =>
+          `<option value="${p.productId}">${p.asset} (${p.type}) - ${p.quantity} units</option>`
+        ).join('');
+        if (portfolio.length === 0) sellProductSelect.innerHTML = '<option value="">No holdings to sell</option>';
+
+
+        // Accounts
+        const accountOptions = accounts.map(a =>
+          `<option value="${a._id}">${a.type} - A/C ${a.accountNumber} (Bal: ₹${a.balance.toFixed(2)})</option>`
+        ).join('');
+        accountSelect.innerHTML = accountOptions;
+        sellAccountSelect.innerHTML = accountOptions;
+        if (accounts.length === 0) {
+            accountSelect.innerHTML = '<option value="">No accounts available</option>';
+            sellAccountSelect.innerHTML = '<option value="">No accounts available</option>';
+        }
+
+      } catch (err) {
+        console.error('Error loading products and accounts:', err);
+        showMessage('Error', 'Failed to load product and account data.');
+      }
+    }
+
+    // Handle new investment form submission
+    document.getElementById('investmentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const body = {
+        productId: form.productId.value,
+        units: parseFloat(form.units.value),
+        accountId: form.accountId.value
+      };
+
+      if (!body.productId || !body.units || !body.accountId) {
+          showMessage('Validation Error', 'Please select an investment, enter units, and select an account.');
+          return;
+      }
+      if (body.units <= 0 || isNaN(body.units)) {
+          showMessage('Validation Error', 'Please enter a valid number of units.');
+          return;
+      }
+
+      try {
+        const res = await fetch(`${BASE_URL}/investments/buy`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!res.ok) {
+            showMessage('Error', result.message || 'Failed to add investment.');
+            return;
+        }
+        showMessage('Success', '✅ Investment added successfully!');
+        fetchPortfolio();
+        loadProductsAndAccounts(); // Reload accounts to reflect balance changes
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        showMessage('Error', 'An unexpected error occurred while adding investment.');
+      }
+    });
+
+    // Handle sell investment form submission
+    document.getElementById('sellForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const body = {
+        productId: form.sellProductId.value,
+        units: parseFloat(form.sellUnits.value),
+        accountId: form.sellAccountId.value
+      };
+
+      if (!body.productId || !body.units || !body.accountId) {
+          showMessage('Validation Error', 'Please select an investment, enter units, and select an account.');
+          return;
+      }
+      if (body.units <= 0 || isNaN(body.units)) {
+          showMessage('Validation Error', 'Please enter a valid number of units.');
+          return;
+      }
+
+      try {
+        const res = await fetch(`${BASE_URL}/investments/sell`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!res.ok) {
+            showMessage('Error', result.message || 'Failed to sell investment.');
+            return;
+        }
+        showMessage('Success', '✅ Investment sold successfully!');
+        fetchPortfolio();
+        loadProductsAndAccounts(); // Reload products (holdings) and accounts
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        showMessage('Error', 'An unexpected error occurred while selling investment.');
+      }
+    });
+
+    // Toggle visibility of Buy and Sell sections
+    function toggleBuy() {
+      document.getElementById('sellInvestmentSection')?.classList.add('hidden');
+      document.getElementById('buyInvestmentSection')?.classList.remove('hidden'); // Ensure buy section is visible
+    }
+
+    function toggleSell() {
+      document.getElementById('buyInvestmentSection')?.classList.add('hidden'); // Ensure buy section is hidden
+      document.getElementById('sellInvestmentSection')?.classList.remove('hidden');
+    }
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!token) {
+            showMessage('Authentication Required', 'You are not logged in. Please log in to access this page.', () => {
+                window.location.href = 'login.html'; // Redirect to login page
+            });
+            return;
+        }
+        fetchPortfolio();
+        loadProductsAndAccounts();
+        toggleBuy(); // Default to showing the buy form
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MyBank - Cheque Book Request</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font globally if available, fall back to sans-serif */
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better appearance (if content overflows) */
+        .main-content-area::-webkit-scrollbar { width: 8px; }
+        .main-content-area::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        /* Custom styling for form inputs to ensure consistent appearance and responsiveness */
+        .form-input {
+            width: 100%;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus */
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #60a5fa; /* ring-blue-400 */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
+        }
+        /* Style for disabled select options */
+        select option:disabled {
+            color: #9ca3af; /* gray-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+
+    <div class="flex-1 flex flex-col w-full overflow-hidden">
+        <!-- Header - Standardized for MyBank pages -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
+            <div class="order-1 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Dashboard</span>
+                    <span class="inline sm:hidden">Back</span>
+                </a>
+            </div>
+            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
+                    Cheque Book Request
+                </h1>
+            </div>
+            <div class="order-3">
+                <a href="recentalerts.html">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                        </svg>
+                    </button>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-8 main-content-area">
+            <div class="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow-lg border border-blue-100">
+                <h1 class="text-3xl font-extrabold mb-6 text-center text-gray-900">Request Cheque Book</h1>
+
+                <form id="chequeForm" class="space-y-6">
+                    <div>
+                        <label for="linkedAccount" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+                        <select id="linkedAccount" class="form-input" required>
+                            <option value="">Loading accounts...</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="leaves" class="block text-sm font-medium text-gray-700 mb-1">Number of Leaves</label>
+                        <select id="leaves" class="form-input" required>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Delivery Address</label>
+                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="deliveryAddress" value="registered" checked class="form-radio h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full mr-2">
+                                <span class="text-gray-700">Registered Address</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="deliveryAddress" value="new" class="form-radio h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full mr-2">
+                                <span class="text-gray-700">New Address</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="newAddressFields" class="space-y-4 hidden">
+                        <div>
+                            <label for="addressLine1" class="block text-sm font-medium text-gray-700 mb-1">Address Line 1</label>
+                            <input type="text" id="addressLine1" placeholder="Address Line 1" class="form-input">
+                        </div>
+                        <div>
+                            <label for="addressLine2" class="block text-sm font-medium text-gray-700 mb-1">Address Line 2 (optional)</label>
+                            <input type="text" id="addressLine2" placeholder="Address Line 2" class="form-input">
+                        </div>
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                            <input type="text" id="city" placeholder="City" class="form-input">
+                        </div>
+                        <div>
+                            <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                            <input type="text" id="state" placeholder="State" class="form-input">
+                        </div>
+                        <div>
+                            <label for="zip" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                            <input type="text" id="zip" placeholder="ZIP Code" class="form-input">
+                        </div>
+                        <div>
+                            <label for="country" class="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                            <input type="text" id="country" placeholder="Country" class="form-input" value="India">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">Submit Request</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';
+        const token = localStorage.getItem('token');
+        const chequeForm = document.getElementById('chequeForm');
+        const linkedAccount = document.getElementById('linkedAccount');
+        const deliveryRadios = document.querySelectorAll('input[name="deliveryAddress"]');
+        const newAddressFields = document.getElementById('newAddressFields');
+
+        // Toggle new address fields
+        deliveryRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (document.querySelector('input[name="deliveryAddress"]:checked').value === 'new') {
+                    newAddressFields.classList.remove('hidden');
+                } else {
+                    newAddressFields.classList.add('hidden');
+                }
+            });
+        });
+
+        // Load accounts and previous requests
+        async function loadAccountsAndRequests() {
+            try {
+                // 1️⃣ Fetch accounts
+                const accRes = await fetch(`${BASE_URL}/accounts/summary`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const accounts = await accRes.json();
+
+                // 2️⃣ Fetch previous cheque requests
+                const reqRes = await fetch(`${BASE_URL}/cheque-requests/my-requests`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const { requests } = await reqRes.json();
+
+                const requestedAccountIds = requests
+                    .filter(req => req.status === 'Pending' || req.status === 'Processing' || req.status === undefined)
+                    .map(req => req.account._id);
+
+                linkedAccount.innerHTML = '<option value="">Select an account</option>';
+                accounts.forEach(acc => {
+                    const option = document.createElement('option');
+                    option.value = acc._id;
+                    option.textContent = `${acc.type} (${acc.accountNumber})`;
+
+                    if (requestedAccountIds.includes(acc._id)) {
+                        option.disabled = true;
+                        option.textContent += ' (Already Requested)';
+                    }
+                    linkedAccount.appendChild(option);
+                });
+
+                // 3️⃣ Display previous requests below the form
+                displayPreviousRequests(requests);
+            } catch (err) {
+                console.error(err);
+                linkedAccount.innerHTML = '<option value="">Failed to load accounts</option>';
+            }
+        }
+
+        // Display previous requests
+        function displayPreviousRequests(requests) {
+            const existing = document.getElementById('previousRequests');
+            if (existing) existing.remove();
+
+            const mainElement = document.querySelector('main'); // Get the main content area
+
+            const container = document.createElement('div');
+            container.id = 'previousRequests';
+            container.className = 'mt-8 p-6 bg-white rounded-2xl shadow-lg border border-blue-100'; // Styled container
+
+            const heading = document.createElement('h2');
+            heading.textContent = 'Your Previous Cheque Book Requests';
+            heading.className = 'text-2xl font-bold mb-4 text-gray-900'; // Styled heading
+            container.appendChild(heading);
+
+            if (requests.length === 0) {
+                const noReq = document.createElement('p');
+                noReq.textContent = 'No previous cheque book requests found.';
+                noReq.className = 'text-gray-500 text-center py-4'; // Styled message
+                container.appendChild(noReq);
+            } else {
+                const list = document.createElement('ul');
+                list.className = 'space-y-3 text-base'; // Styled list
+                requests.forEach(req => {
+                    const item = document.createElement('li');
+                    item.className = 'p-3 bg-gray-50 rounded-lg border border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center'; // Styled list item
+                    item.innerHTML = `
+                        <div>
+                            <span class="font-semibold text-gray-800">${req.account.type} (****${req.account.accountNumber.slice(-4)})</span> - ${req.leaves} leaves
+                        </div>
+                        <div class="mt-1 sm:mt-0">
+                            Status: <span class="font-semibold text-${req.status === 'Completed' ? 'green' : (req.status === 'Cancelled' ? 'red' : 'blue')}-600">${req.status || 'Pending'}</span>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+                container.appendChild(list);
+            }
+
+            mainElement.appendChild(container); // Append to main content area
+        }
+
+        // Handle form submission
+        chequeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const accountId = linkedAccount.value;
+            const leaves = document.getElementById('leaves').value;
+            const deliveryType = document.querySelector('input[name="deliveryAddress"]:checked').value;
+
+            let deliveryAddress = 'Registered';
+            if (deliveryType === 'new') {
+                const addressLine1 = document.getElementById('addressLine1').value.trim();
+                const addressLine2 = document.getElementById('addressLine2').value.trim();
+                const city = document.getElementById('city').value.trim();
+                const state = document.getElementById('state').value.trim();
+                const zip = document.getElementById('zip').value.trim();
+                const country = document.getElementById('country').value.trim();
+
+                // Basic validation for new address fields
+                if (!addressLine1 || !city || !state || !zip || !country) {
+                    alert('Please fill in all required new address fields.');
+                    return;
+                }
+
+                deliveryAddress = `${addressLine1}, ${addressLine2 ? addressLine2 + ', ' : ''}${city}, ${state}, ${zip}, ${country}`;
+            }
+
+            const data = {
+                accountId: accountId,
+                leaves: parseInt(leaves),
+                deliveryAddress
+            };
+
+            try {
+                const res = await fetch(`${BASE_URL}/cheque-requests/request`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert('Cheque book request submitted successfully! Your cheque book will be delivered within 7 days.');
+                    chequeForm.reset();
+                    document.querySelector('input[name="deliveryAddress"][value="registered"]').checked = true; // Reset radio to registered
+                    newAddressFields.classList.add('hidden');
+                    await loadAccountsAndRequests(); // Reload to update disabled state and history
+                } else {
+                    alert(result.message || 'Error submitting request');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Server error');
+            }
+        });
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial authentication check
+            if (!token) {
+                alert('Authentication Required: You are not logged in. Please log in to access this page.');
+                window.location.href = 'login.html';
+                return;
+            }
+            loadAccountsAndRequests();
+        });
+    </script>
+</body>
+</html>
