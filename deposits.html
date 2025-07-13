@@ -19,34 +19,72 @@
       border-color: #60a5fa; /* ring-blue-400 */
       box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45); /* focus:ring-2 focus:ring-blue-400 */
     }
+
+    /* Styles for Deposit Cards */
+    .deposit-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .deposit-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    .deposit-card-header {
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #edf2f7;
+    }
+    .deposit-card-body {
+      padding: 1rem 1.25rem;
+    }
+    .deposit-card-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid #edf2f7;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .deposit-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-in-out;
+    }
+    .deposit-details.open {
+      max-height: 500px; /* Adjust as needed based on content height */
+      transition: max-height 0.5s ease-in-out;
+    }
+
+    /* Specific border colors for deposit types */
+    .border-fd { border-left-color: #F59E0B; /* Amber */ }
+    .border-rd { border-left-color: #06B6D4; /* Cyan */ }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col font-sans text-gray-800">
 
   <div class="flex-1 flex flex-col w-full overflow-hidden">
-    <!-- Header - Keeping as per user request -->
-    <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
-      <div class="order-1 sm:order-none">
-        <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200">
-          <svg class="w-6 h-6 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <header class="bg-white shadow-sm p-2 md:p-4 flex items-center justify-between relative z-10">
+      <div class="absolute left-4 top-1/2 -translate-y-1/2 sm:static sm:translate-y-0 sm:order-none">
+        <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center">
+          <svg class="w-5 h-5 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
           </svg>
-          <div class="hidden sm:flex items-center font-medium">
-            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
-            </svg>
-            Dashboard
-          </div>
+          <span class="hidden sm:inline font-medium text-sm md:text-base ml-1">Dashboard</span>
         </a>
       </div>
-      <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
-        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
-          Deposit Management
-        </h1>
-      </div>
-      <div class="order-3">
+
+      <h1 class="flex-1 text-center text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-800 px-0 sm:px-6">
+        Deposits
+      </h1>
+
+      <div class="absolute right-4 top-1/2 -translate-y-1/2 sm:static sm:translate-y-0 sm:order-last">
         <a href="recentalerts.html">
           <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,22 +96,18 @@
       </div>
     </header>
 
-    <!-- Main Content -->
     <main class="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full space-y-10">
 
-      <!-- Deposits Section -->
       <section>
-        <h2 class="text-2xl font-bold mb-6 text-gray-800">Your Deposits</h2>
-        <div id="depositsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Deposit cards will be loaded here by JavaScript -->
-        </div>
-        <p id="noDepositsMessage" class="text-center py-8 text-lg font-medium text-gray-500 hidden">You have no active deposits.</p>
+        <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-800">Your Deposits</h2>
+        <div id="depositsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          </div>
+        <p id="noDepositsMessage" class="text-center py-8 text-base sm:text-lg font-medium text-gray-500 hidden">You have no active deposits.</p>
       </section>
 
-      <!-- New Deposit Form -->
       <section class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-blue-100">
         <h2 class="text-xl font-bold mb-6 text-gray-800">Open a New Deposit</h2>
-        <form id="depositForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <form id="depositForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <label for="depositType" class="block text-sm font-medium text-gray-700 mb-1">Deposit Type</label>
             <select id="depositType" class="form-input" required>
@@ -94,8 +128,8 @@
             <label for="accountSelect" class="block text-sm font-medium text-gray-700 mb-1">Link to Account</label>
             <select id="accountSelect" class="form-input" required></select>
           </div>
-          <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center sm:justify-end pt-4">
-            <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 hover:shadow-xl transition-all duration-200 font-semibold">Open Deposit</button>
+          <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center sm:justify-end pt-2 sm:pt-4">
+            <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 sm:px-8 sm:py-3 rounded-lg hover:bg-blue-700 hover:shadow-xl transition-all duration-200 font-semibold text-base sm:text-lg">Open Deposit</button>
           </div>
         </form>
       </section>
@@ -103,7 +137,6 @@
     </main>
   </div>
 
-  <!-- Message Box Modal (for simple alerts/success) -->
   <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 ease-out">
       <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm mx-auto transform scale-95 opacity-0 transition-all duration-300 ease-out"
            id="messageBoxContent">
@@ -117,7 +150,6 @@
       </div>
   </div>
 
-  <!-- Confirmation Box Modal (for Yes/No confirmations) -->
   <div id="confirmationBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 ease-out">
       <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-lg mx-auto transform scale-95 opacity-0 transition-all duration-300 ease-out"
            id="confirmationBoxContent">
@@ -231,141 +263,178 @@ function closeConfirmation() {
     }, 300);
 }
 
+// Function to get border color based on deposit type
+function getDepositBorderClass(type) {
+    const map = {
+        fd: 'border-fd',
+        rd: 'border-rd'
+    };
+    return map[type.toLowerCase()] || 'border-gray-300'; // Default if type is unknown
+}
+
+function createDepositCard(deposit) {
+    const card = document.createElement('div');
+    card.className = `deposit-card border-l-8 ${getDepositBorderClass(deposit.type)}`;
+
+    const today = new Date();
+    const maturityDate = new Date(deposit.maturityDate);
+    const isMature = today >= maturityDate;
+    const statusClass = isMature ? 'text-green-600' : 'text-blue-600';
+
+    card.innerHTML = `
+        <div class="deposit-card-header">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">${deposit.type} Deposit</h3>
+            <span class="font-semibold text-xl sm:text-2xl text-blue-600">₹${parseFloat(deposit.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </div>
+        <div class="deposit-card-body pb-0">
+            <p class="text-sm text-gray-600 mb-1">Duration: <span class="font-medium">${deposit.durationMonths} months</span></p>
+            <p class="text-sm text-gray-600 mb-1">Interest Rate: <span class="font-medium">${parseFloat(deposit.interestRate).toFixed(2)}%</span></p>
+            <p class="text-sm text-gray-600 mb-4">Status: <span class="capitalize font-semibold ${statusClass}">${isMature ? 'Matured' : 'Active'}</span></p>
+
+            <div class="deposit-details">
+                <p class="text-sm text-gray-600 mb-1">Maturity Date: <span class="font-medium">${new Date(deposit.maturityDate).toLocaleDateString('en-IN')}</span></p>
+                <p class="text-sm text-gray-600 mb-1">Account Linked: <span class="font-mono">${deposit.account?.accountNumber ? deposit.account.accountNumber : 'N/A'}</span></p>
+                <p class="text-sm text-gray-600 mb-1">Created At: <span class="font-medium">${new Date(deposit.createdAt).toLocaleDateString('en-IN')}</span></p>
+            </div>
+        </div>
+        <div class="deposit-card-footer">
+            <button class="toggle-details-button bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md text-sm flex items-center transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+                More Details
+            </button>
+            <button class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors duration-200 shadow" onclick="promptCloseDeposit('${deposit._id}')">
+                Close & Credit
+            </button>
+        </div>
+    `;
+    return card;
+}
+
 
 async function loadDeposits() {
-  try {
-    const res = await fetch(`${BASE_URL}/deposits`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    try {
+        const res = await fetch(`${BASE_URL}/deposits`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        showMessage('Error', errorData.message || 'Failed to load deposits.');
-        return;
+        if (!res.ok) {
+            const errorData = await res.json();
+            showMessage('Error', errorData.message || 'Failed to load deposits.');
+            return;
+        }
+
+        const deposits = await res.json();
+        depositsGrid.innerHTML = ''; // Clear existing deposits
+
+        if (deposits.length === 0) {
+            noDepositsMessage.classList.remove('hidden');
+        } else {
+            noDepositsMessage.classList.add('hidden');
+            deposits.forEach(deposit => {
+                const card = createDepositCard(deposit);
+                depositsGrid.appendChild(card);
+            });
+
+            // Add event listeners for the new toggle buttons
+            document.querySelectorAll('.toggle-details-button').forEach(btn => {
+                btn.addEventListener('click', (event) => {
+                    const card = event.target.closest('.deposit-card');
+                    const details = card.querySelector('.deposit-details');
+                    const icon = btn.querySelector('svg path');
+                    details.classList.toggle('open');
+                    icon.setAttribute('d', details.classList.contains('open') ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7');
+                });
+            });
+        }
+    } catch (err) {
+        console.error('Error loading deposits:', err);
+        showMessage('Error', 'Failed to load deposits. Please check your network connection.');
     }
-
-    const deposits = await res.json();
-    depositsGrid.innerHTML = ''; // Clear existing deposits
-
-    if (deposits.length === 0) {
-      noDepositsMessage.classList.remove('hidden');
-    } else {
-      noDepositsMessage.classList.add('hidden');
-      deposits.forEach(deposit => {
-        // Calculate maturity status
-        const today = new Date();
-        const maturityDate = new Date(deposit.maturityDate);
-        const isMature = today >= maturityDate;
-        const statusClass = isMature ? 'text-green-600' : 'text-blue-600';
-
-        depositsGrid.innerHTML += `
-          <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200 space-y-4 transform transition-all duration-300 hover:shadow-lg hover:scale-105">
-            <div class="flex justify-between items-center border-b pb-4">
-              <h3 class="text-xl font-bold text-gray-800">${deposit.type} Deposit</h3>
-              <span class="font-semibold text-2xl text-blue-600">₹${parseFloat(deposit.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-            </div>
-            <div class="space-y-2 text-sm text-gray-600">
-              <p>Duration: <span class="font-medium">${deposit.durationMonths} months</span></p>
-              <p>Interest Rate: <span class="font-medium">${parseFloat(deposit.interestRate).toFixed(2)}%</span></p>
-              <p>Status: <span class="capitalize font-semibold ${statusClass}">${isMature ? 'Matured' : 'Active'}</span></p>
-              <p>Maturity: <span class="font-medium">${new Date(deposit.maturityDate).toLocaleDateString('en-IN')}</span></p>
-            </div>
-            <div class="flex gap-2 pt-4 border-t">
-              <button class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors duration-200 shadow" onclick="promptCloseDeposit('${deposit._id}')">
-                Close & Credit
-              </button>
-            </div>
-          </div>
-        `;
-      });
-    }
-  } catch (err) {
-    console.error('Error loading deposits:', err);
-    showMessage('Error', 'Failed to load deposits. Please check your network connection.');
-  }
 }
 
 async function loadAccounts() {
-  try {
-    const res = await fetch(`${BASE_URL}/accounts/summary`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    try {
+        const res = await fetch(`${BASE_URL}/accounts/summary`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        showMessage('Error', errorData.message || 'Failed to load accounts.');
-        return;
-    }
+        if (!res.ok) {
+            const errorData = await res.json();
+            showMessage('Error', errorData.message || 'Failed to load accounts.');
+            return;
+        }
 
-    const accounts = await res.json();
-    accountSelect.innerHTML = ''; // Clear previous options
-    if (accounts.length === 0) {
-        accountSelect.innerHTML = '<option value="">No accounts available</option>';
-        accountSelect.disabled = true;
-    } else {
-        accountSelect.disabled = false;
-        accountSelect.innerHTML = accounts.map(a =>
-            `<option value="${a._id}">A/C ${a.accountNumber} - Balance: ₹${a.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>`
-        ).join('');
+        const accounts = await res.json();
+        accountSelect.innerHTML = ''; // Clear previous options
+        if (accounts.length === 0) {
+            accountSelect.innerHTML = '<option value="">No accounts available</option>';
+            accountSelect.disabled = true;
+        } else {
+            accountSelect.disabled = false;
+            accountSelect.innerHTML = accounts.map(a =>
+                `<option value="${a._id}">A/C ${a.accountNumber} - Balance: ₹${a.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>`
+            ).join('');
+        }
+    } catch (err) {
+        console.error('Error loading accounts:', err);
+        showMessage('Error', 'Could not load accounts. Please try again.');
     }
-  } catch (err) {
-    console.error('Error loading accounts:', err);
-    showMessage('Error', 'Could not load accounts. Please try again.');
-  }
 }
 
 depositForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!depositType.value || !depositAmount.value || !depositTerm.value || !accountSelect.value) {
-    showMessage('Validation Error', 'Please fill in all deposit form fields.');
-    return;
-  }
-
-  const amount = parseFloat(depositAmount.value);
-  const term = parseInt(depositTerm.value);
-
-  if (amount < 1000 || isNaN(amount)) {
-      showMessage('Validation Error', 'Deposit amount must be at least ₹1,000.');
-      return;
-  }
-  if (term < 6 || term > 120 || isNaN(term)) {
-      showMessage('Validation Error', 'Duration must be between 6 and 120 months.');
-      return;
-  }
-
-  const interestRate = depositType.value === 'FD' ? 6.5 : 6.0; // Fixed rates
-  const body = {
-    type: depositType.value,
-    amount: amount,
-    durationMonths: term,
-    interestRate: interestRate,
-    accountId: accountSelect.value
-  };
-
-  try {
-    const res = await fetch(`${BASE_URL}/deposits`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-
-    if (res.ok) {
-      showMessage('Success', 'Deposit opened successfully! Your funds have been transferred.');
-      depositForm.reset();
-      loadDeposits(); // Reload deposits to show the new one
-      loadAccounts(); // Reload accounts to reflect updated balance
-    } else {
-      const errorData = await res.json();
-      showMessage('Error', errorData.message || 'Failed to open deposit. Please try again.');
+    if (!depositType.value || !depositAmount.value || !depositTerm.value || !accountSelect.value) {
+        showMessage('Validation Error', 'Please fill in all deposit form fields.');
+        return;
     }
-  } catch (err) {
-    console.error('Error opening deposit:', err);
-    showMessage('Error', 'An unexpected error occurred while opening the deposit.');
-  }
+
+    const amount = parseFloat(depositAmount.value);
+    const term = parseInt(depositTerm.value);
+
+    if (amount < 1000 || isNaN(amount)) {
+        showMessage('Validation Error', 'Deposit amount must be at least ₹1,000.');
+        return;
+    }
+    if (term < 6 || term > 120 || isNaN(term)) {
+        showMessage('Validation Error', 'Duration must be between 6 and 120 months.');
+        return;
+    }
+
+    const interestRate = depositType.value === 'FD' ? 6.5 : 6.0; // Fixed rates
+    const body = {
+        type: depositType.value,
+        amount: amount,
+        durationMonths: term,
+        interestRate: interestRate,
+        accountId: accountSelect.value
+    };
+
+    try {
+        const res = await fetch(`${BASE_URL}/deposits`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+            showMessage('Success', 'Deposit opened successfully! Your funds have been transferred.');
+            depositForm.reset();
+            loadDeposits(); // Reload deposits to show the new one
+            loadAccounts(); // Reload accounts to reflect updated balance
+        } else {
+            const errorData = await res.json();
+            showMessage('Error', errorData.message || 'Failed to open deposit. Please try again.');
+        }
+    } catch (err) {
+        console.error('Error opening deposit:', err);
+        showMessage('Error', 'An unexpected error occurred while opening the deposit.');
+    }
 });
 
 // Function to prompt confirmation before closing deposit

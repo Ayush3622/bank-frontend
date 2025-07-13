@@ -36,29 +36,27 @@
 <body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
 
     <div class="flex-1 flex flex-col w-full overflow-hidden">
-        <!-- Header - Standardized for MyBank pages -->
-        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
-            <div class="order-1 sm:order-none">
-                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center font-medium">
-                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+        <header class="bg-white shadow-sm p-2 md:p-4 flex items-center justify-between relative z-10">
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 sm:static sm:translate-y-0 sm:order-none">
+                <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center">
+                    <svg class="w-5 h-5 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
                     </svg>
-                    <span class="hidden sm:inline">Dashboard</span>
-                    <span class="inline sm:hidden">Back</span>
+                    <span class="hidden sm:inline font-medium text-sm md:text-base ml-1">Dashboard</span>
                 </a>
             </div>
-            <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
-                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
-                    Recent Alerts
-                </h1>
-            </div>
-            <div class="order-3">
-            </div>
+
+            <h1 class="flex-1 text-center text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-800 px-0 sm:px-6">
+                Recent Alerts
+            </h1>
+
+            <div class="order-3 w-6 h-6 sm:w-auto sm:h-auto">
+                </div>
         </header>
 
         <main class="flex-1 p-4 sm:p-6 md:p-8 max-w-4xl mx-auto w-full space-y-8 main-content-area">
 
-            <!-- Filter Section -->
             <section class="bg-white p-6 rounded-xl shadow-lg border border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h2 class="text-xl font-bold text-gray-900 w-full sm:w-auto text-center sm:text-left">Filter Alerts by Category</h2>
                 <div class="w-full sm:w-auto">
@@ -87,9 +85,7 @@
                 </div>
             </section>
 
-            <!-- Activity Logs Container -->
             <section id="logsContainer" class="space-y-4">
-                <!-- Logs will be loaded here by JavaScript -->
                 <p class="text-gray-500 text-center py-8">Loading activity logs...</p>
             </section>
 
@@ -99,6 +95,8 @@
 
         </main>
     </div>
+</body>
+</html>
 
     <script>
         const BASE_URL = 'https://bank-backend-3o9o.onrender.com/api';

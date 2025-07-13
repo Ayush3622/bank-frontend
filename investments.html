@@ -37,49 +37,39 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans">
   <div class="flex-1 flex flex-col w-full overflow-hidden">
-    <!-- Header - Keeping as per user request -->
-    <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
-      <div class="order-1 sm:order-none">
-        <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200">
-          <svg class="w-6 h-6 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
-          </svg>
-          <div class="hidden sm:flex items-center font-medium">
-            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
-            </svg>
-            Dashboard
-          </div>
-        </a>
-      </div>
-      <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
-        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
-          Investment Management
+    <header class="bg-white shadow-sm p-2 md:p-4 flex items-center justify-between relative z-10">
+        <div class="absolute left-4 top-1/2 -translate-y-1/2 sm:static sm:translate-y-0 sm:order-none">
+            <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center">
+                <svg class="w-5 h-5 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
+                </svg>
+                <span class="hidden sm:inline font-medium text-sm md:text-base ml-1">Dashboard</span>
+            </a>
+        </div>
+
+        <h1 class="flex-1 text-center text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-800 px-0 sm:px-6">
+            Investments
         </h1>
-      </div>
-      <div class="order-3">
-        <a href="recentalerts.html">
-          <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
-            </svg>
-          </button>
-        </a>
-      </div>
+
+        <div class="absolute right-4 top-1/2 -translate-y-1/2 sm:static sm:translate-y-0 sm:order-last">
+            <a href="recentalerts.html">
+                <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1"/>
+                    </svg>
+                </button>
+            </a>
+        </div>
     </header>
 
     <main class="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full">
       <h2 class="text-2xl font-bold mb-4 text-gray-800">Your Investment Portfolio</h2>
 
-      <!-- Metrics Section - Responsive Grid -->
       <div id="metrics" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        <!-- Metric cards will be rendered here by JavaScript -->
-      </div>
+        </div>
 
-      <!-- Holdings Table -->
       <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <h3 class="text-xl font-semibold mb-3 text-gray-800">Your Holdings</h3>
         <div class="overflow-x-auto rounded-md border border-gray-200">
@@ -103,13 +93,11 @@
         </div>
       </div>
 
-      <!-- Buy/Sell Buttons -->
       <div class="flex flex-col sm:flex-row justify-center sm:justify-end gap-3 mb-6">
         <button onclick="toggleBuy()" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 shadow-md font-medium">Buy Investment</button>
         <button onclick="toggleSell()" class="w-full sm:w-auto px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 shadow-md font-medium">Sell Investment</button>
       </div>
 
-      <!-- Add Investment Form -->
       <div id="buyInvestmentSection" class="bg-white rounded-lg shadow-md p-6 mb-6">
         <h3 class="text-xl font-semibold mb-4 text-gray-800">Add New Investment</h3>
         <form id="investmentForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -131,7 +119,6 @@
         </form>
       </div>
 
-      <!-- Sell Investment Form -->
       <div id="sellInvestmentSection" class="bg-white rounded-lg shadow-md p-6 hidden">
         <h3 class="text-xl font-semibold mb-4 text-gray-800">Sell Investment</h3>
         <form id="sellForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -155,7 +142,6 @@
     </main>
   </div>
 
-  <!-- Message Box Modal -->
   <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 ease-out">
       <div class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm mx-auto transform scale-95 opacity-0 transition-all duration-300 ease-out"
            id="messageBoxContent">
@@ -168,7 +154,8 @@
           </div>
       </div>
   </div>
-
+</body>
+</html>
 
   <script>
     const token = localStorage.getItem('token');
