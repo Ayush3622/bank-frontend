@@ -44,23 +44,39 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
     .account-card-header {
-      padding: 1.5rem;
+      padding: 1rem 1.25rem; /* Adjusted for mobile: p-4 */
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid #edf2f7;
     }
+    @media (min-width: 768px) { /* md breakpoint */
+      .account-card-header {
+        padding: 1.5rem; /* Original: p-6 */
+      }
+    }
     .account-card-body {
-      padding: 1.5rem;
+      padding: 1rem 1.25rem; /* Adjusted for mobile: p-4 */
+    }
+    @media (min-width: 768px) { /* md breakpoint */
+      .account-card-body {
+        padding: 1.5rem; /* Original: p-6 */
+      }
     }
     .account-card-footer {
-      padding: 1.5rem;
+      padding: 1rem 1.25rem; /* Adjusted for mobile: p-4 */
       border-top: 1px solid #edf2f7;
       display: flex;
       justify-content: flex-end;
       gap: 0.75rem;
       flex-wrap: wrap;
     }
+    @media (min-width: 768px) { /* md breakpoint */
+      .account-card-footer {
+        padding: 1.5rem; /* Original: p-6 */
+      }
+    }
+
     .border-checking { border-left-color: #3B82F6; }
     .border-savings { border-left-color: #10B981; }
     .border-business { border-left-color: #F97316; }
@@ -123,10 +139,16 @@
       .account-form {
         grid-template-columns: 1fr;
       }
+      .account-form button {
+        padding: 10px 20px; /* Smaller button on mobile */
+      }
     }
     @media (min-width: 768px) {
       .account-form {
         grid-template-columns: 1fr 1fr;
+      }
+      .account-form button {
+        padding: 12px 24px; /* Original button size on desktop */
       }
     }
   </style>
@@ -134,29 +156,22 @@
 <body class="bg-gray-100">
 
   <div class="flex-1 flex flex-col w-full overflow-hidden">
-    <!-- Top Bar same as yours -->
-    <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between z-10 space-y-3 sm:space-y-0">
-      <div class="order-1 sm:order-none">
-        <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-all-fast">
-          <svg class="w-6 h-6 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <header class="bg-white shadow-sm p-2 md:p-4 flex items-center justify-between relative z-10">
+      <div class="absolute left-4 top-1/2 -translate-y-1/2 sm:static sm:translate-y-0 sm:order-none">
+        <a href="dashboard.html" class="text-blue-600 hover:text-blue-800 transition-all-fast flex items-center">
+          <svg class="w-5 h-5 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
           </svg>
-          <div class="hidden sm:flex items-center font-medium">
-            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/>
-            </svg>
-            Dashboard
-          </div>
+          <span class="hidden sm:inline font-medium text-sm md:text-base ml-1">Dashboard</span>
         </a>
       </div>
-      <div class="order-2 sm:order-none w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-6">
-        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center sm:text-left w-full">
-          Account Management
-        </h1>
-      </div>
-      <div class="order-3">
+
+      <h1 class="flex-1 text-center text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-800 px-0 sm:px-6">
+        Accounts
+      </h1>
+
+      <div class="absolute right-4 top-1/2 -translate-y-1/2 sm:static sm:translate-y-0 sm:order-last">
         <a href="recentalerts.html">
           <button class="text-gray-600 hover:text-gray-800 focus:outline-none rounded-full p-2 bg-gray-100 hover:bg-gray-200 transition-all-fast shadow-sm">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,9 +183,9 @@
       </div>
     </header>
 
-    <main class="p-6 max-w-6xl mx-auto">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Accounts</h2>
-      <div id="account-section" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+    <main class="p-4 md:p-6 max-w-6xl mx-auto">
+      <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4">Your Accounts</h2>
+      <div id="account-section" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6"></div>
     </main>
 
     <form id="accountForm" class="account-form">
@@ -188,7 +203,6 @@
           <option value="Business">Business</option>
         </select>
       </div>
-      <!-- ✅ Branch Select added here -->
       <div>
         <label for="branch">Branch</label>
         <select id="branch" name="branch" required>
@@ -235,18 +249,18 @@
 
       card.innerHTML = `
         <div class="account-card-header">
-          <h3 class="text-2xl font-bold text-gray-800">${account.type} Account</h3>
-          <span class="font-semibold text-xl text-blue-600 ml-4">₹${account.balance.toLocaleString('en-IN')}</span>
+          <h3 class="text-xl md:text-2xl font-bold text-gray-800">${account.type} Account</h3>
+          <span class="font-semibold text-lg md:text-xl text-blue-600 ml-4">₹${account.balance.toLocaleString('en-IN')}</span>
         </div>
         <div class="account-card-body pb-0">
-          <p class="text-gray-600 mb-1">Account Number: <span class="font-mono">${maskedNumber}</span></p>
-          <p class="text-gray-600 mb-1">Account Holder: ${account.accountHolder}</p>
-          <p class="text-gray-600 mb-4">Account Type: Personal ${account.type}</p>
+          <p class="text-sm md:text-base text-gray-600 mb-1">Account Number: <span class="font-mono">${maskedNumber}</span></p>
+          <p class="text-sm md:text-base text-gray-600 mb-1">Account Holder: ${account.accountHolder}</p>
+          <p class="text-sm md:text-base text-gray-600 mb-4">Account Type: Personal ${account.type}</p>
           <div class="account-details">
-            <p class="text-gray-600 mb-1">Available Balance: <span class="font-semibold text-blue-700">₹${account.balance.toLocaleString('en-IN')}</span></p>
-            <p class="text-gray-600 mb-1">Interest Rate: ${(account.interestRate * 100).toFixed(2)}% APY</p>
-            <p class="text-gray-600 mb-1">Opening Date: ${openingDate}</p>
-            <p class="text-gray-600 mb-1">Branch: ${account.branch}</p>
+            <p class="text-sm md:text-base text-gray-600 mb-1">Available Balance: <span class="font-semibold text-blue-700">₹${account.balance.toLocaleString('en-IN')}</span></p>
+            <p class="text-sm md:text-base text-gray-600 mb-1">Interest Rate: ${(account.interestRate * 100).toFixed(2)}% APY</p>
+            <p class="text-sm md:text-base text-gray-600 mb-1">Opening Date: ${openingDate}</p>
+            <p class="text-sm md:text-base text-gray-600 mb-1">Branch: ${account.branch}</p>
           </div>
         </div>
         <div class="account-card-footer">
